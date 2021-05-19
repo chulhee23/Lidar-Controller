@@ -11,7 +11,11 @@
 const int std_msgs::Float64 velocity = 3;
 ros::Publisher del_pub;
 
-float 
+
+std_msgs::Float64 getDelta(float slope){
+  // TODO
+  return 0;
+}
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
@@ -19,17 +23,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   laser_geometry::LaserProjection projector_;
   projector_.projectLaser(*scan, msgCloud);
 
-  // voxel
+  // voxel start ===========
+  // TODO
 
-  // clustering
+  // voxel end ===========
+
+  // clustering start ======================
+  // TODO
+  // clustering end ======================
+
 
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
-
   // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
-  
-  std_msgs::Float64 delta;
-  // delta = getDelta(slope);
+  // std_msgs::Float64 delta = getDelta(slope);
   // del_pub.publish(delta);
 
 }
