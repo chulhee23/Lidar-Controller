@@ -38,7 +38,11 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
   // std_msgs::Float64 delta = getDelta(slope);
   std_msgs::Float64 delta;
+  
+  // data > 0 -> turn left
+  // data < 0 -> turn right
   delta.data = 1;
+
   del_pub.publish(delta);
 
 }
@@ -54,11 +58,8 @@ int main(int argc, char **argv)
   // If messages are published more quickly than we can send them,
   // the number here specifies how many messages to buffer up before throwing some away.
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
-  
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
-  std_msgs::Float64 velocity;
-  velocity.data = 2; 
-  vel_pub.publish(velocity);
+  
 
   // for Arduino publish end ================================
 
@@ -71,12 +72,17 @@ int main(int argc, char **argv)
   // 2. publish delta value to Arduino
 
 
-  ros::spin();
+  // ros::spin();
   
-  // while(ros::ok()){
-  //   ros::spinOnce();
-  //   loop_rate.sleep();
-  // }
+  std_msgs::Float64 velocity;
+  velocity.data = 2; 
+  
+  while(ros::ok()){
+    
+    vel_pub.publish(velocity);
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
 
   return 0;
 }
