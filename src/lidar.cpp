@@ -3,19 +3,19 @@
 #include <laser_geometry/laser_geometry.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
-
+#include <std_msgs/Float64.h>
 
 #include "gradientDescent.cpp"
 
 
-const int std_msgs::Float64 velocity = 3;
 ros::Publisher del_pub;
 
 
-std_msgs::Float64 getDelta(float slope){
+// std_msgs::Float64 getDelta(float slope){
   // TODO
-  return 0;
-}
+  
+  // return 0;
+// }
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
@@ -37,7 +37,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
   // std_msgs::Float64 delta = getDelta(slope);
-  // del_pub.publish(delta);
+  std_msgs::Float64 delta;
+  delta.data = 1;
+  del_pub.publish(delta);
 
 }
 
@@ -54,8 +56,8 @@ int main(int argc, char **argv)
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
-
-  vel_pub.publish(velocity);
+  // float velocity =3;
+  // vel_pub.publish(velocity);
 
   // for Arduino publish end ================================
 
