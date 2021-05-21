@@ -56,8 +56,9 @@ int main(int argc, char **argv)
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
-  // float velocity =3;
-  // vel_pub.publish(velocity);
+  std_msgs::Float64 velocity;
+  velocity.data = 2; 
+  vel_pub.publish(velocity);
 
   // for Arduino publish end ================================
 
