@@ -101,7 +101,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // clustering end ======================
 
-  getDelta(msgCloud);
+  // getDelta(msgCloud);
 
 
 
