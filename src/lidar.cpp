@@ -42,7 +42,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // data > 0 -> turn left
   // data < 0 -> turn right
   delta.data = -1;
-  ROS_INFO("DELTA %f", delta.data)
+  ROS_INFO("DELTA %f", delta.data);
   del_pub.publish(delta);
 
 }
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
   
   while(ros::ok()){
     vel_pub.publish(velocity);
-    ROS_INFO("VELOCITY %f", msg.data)
+    ROS_INFO("VELOCITY %f", msg.data);
     ros::spinOnce();
     loop_rate.sleep();
   }
