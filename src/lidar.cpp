@@ -61,7 +61,7 @@ void getDelta(const sensor_msgs::PointCloud::ConstPtr msgCloud){
     // cout << max_dmse << endl;
     if (max_dmse < eps)
     {
-      cout << dmse.x << " " << dmse.y << endl;
+      // cout << dmse.x << " " << dmse.y << endl;
       break;
     }
   }
@@ -108,7 +108,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
   
   std_msgs::Float64 delta;
-  delta.data = -1;
+  delta.data = 0.25;
   // delta = getDelta(slope);
   
   // data > 0 -> turn left
@@ -148,7 +148,7 @@ int main(int argc, char **argv)
   // ros::spin();
   
   std_msgs::Float64 velocity;
-  velocity.data = 2; 
+  velocity.data = 4; 
   
   while(ros::ok()){
     vel_pub.publish(velocity);
