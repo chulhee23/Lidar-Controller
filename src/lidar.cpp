@@ -79,7 +79,7 @@ int main(int argc, char **argv)
   
   while(ros::ok()){
     vel_pub.publish(velocity);
-    ROS_INFO("VELOCITY %f", msg.data);
+    ROS_INFO("VELOCITY %f", velocity.data);
     ros::spinOnce();
     loop_rate.sleep();
   }
