@@ -91,6 +91,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
+  
+  // clustering
+  // passthrough
+
   // TODO
 
   // filter ROI end ++++++++++++++++++++++++++
@@ -113,6 +117,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // data > 0 -> turn left
   // data < 0 -> turn right
   
+  
+
   ROS_INFO("DELTA %f", delta.data);
 
   del_pub.publish(delta);
@@ -148,10 +154,10 @@ int main(int argc, char **argv)
   
   std_msgs::Float64 velocity;
   velocity.data = 4; 
+  vel_pub.publish(velocity);
+  ROS_INFO("VELOCITY %f", velocity.data);
   
   while(ros::ok()){
-    vel_pub.publish(velocity);
-    ROS_INFO("VELOCITY %f", velocity.data);
     ros::spinOnce();
     loop_rate.sleep();
   }
