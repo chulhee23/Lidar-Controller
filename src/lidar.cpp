@@ -5,7 +5,11 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <std_msgs/Float64.h>
 
+#include "gradientDescent.cpp"
 
+
+#define FORWARD_RANGE 5
+#define WIDTH 1.5
 ros::Publisher pub;
 ros::Publisher del_pub;
 
@@ -15,6 +19,7 @@ ros::Publisher del_pub;
   
   // return 0;
 // }
+
 // void getDelta(const sensor_msgs::PointCloud::ConstPtr msgCloud){
 //   visualization_msgs::Marker line;
 //   line.header.frame_id = "map";
@@ -91,16 +96,47 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
+  pcl::PointCloud<pcl::PointXYZ> inputCloud;
+  pcl::PointCloud<pcl::PointXYZ> voxelCloud;
+
+  pcl::fromROSMsg(msgCloud, inputCloud); // msgCloud -> inputCloud
+
+  //Voxelization -----------
+  pcl::VoxelGrid<pcl::PointXYZ> vox;
+  vox.setInputCloud(inputCloud.makeShared());
+  vox.setLeafSize(0.4f, 0.4f, 0.4f); // set Grid Size(0.4m)
+  vox.filter(voxelCloud);
+
+  //passthrough===============
+  pcl::PointCloud<pcl::PointXYZ> passCloud;
   
-  // clustering
-  // passthrough
+  pcl::PassThrough<pcl::PointXYZ> pass;
 
-  // TODO
+  pass.setInputCloud(voxelCloud.makeShared());
+  
+  pass.setFilterFieldName("x"); // axis x
+  pass.setFilterLimits(-FORWARD_RANGE, 0);
+  pass.setFilterLimitsNegative(false);
 
+  pass.setFilterFieldName("y"); // axis y
+  pass.setFilterLimits(-WIDTH, WIDTH);  
+  pass.setFilterLimitsNegative(false);
+  
+  
+  pass.filter(passCloud); // pass 로 filtering
+
+  pass.setInputCloud(passCloud1.makeShared());
+  pass.filter(passCloud2);
+
+  // passthrough end =====================
   // filter ROI end ++++++++++++++++++++++++++
 
   // clustering start ======================
   // TODO
+
+  pcl::PointCloud<pcl::PointXYZ> kdCloud;
+
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
 
   // clustering end ======================
 
