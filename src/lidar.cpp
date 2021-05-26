@@ -16,9 +16,11 @@
 #include "gradientDescent.cpp"
 
 
-#define FORWARD_RANGE 2
+#define FORWARD_RANGE 3
 #define WIDTH 1.5
-#define WIDTH_Y_START 0.5
+#define WIDTH_Y_START -0.25
+#define DISTANCE_THRESHOLD 0.35
+
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
@@ -71,7 +73,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // sensor_msgs 
   vox.setInputCloud(inputCloud.makeShared());
-  vox.setLeafSize(0.4f, 0.4f, 0.4f); // set Grid Size(0.4m)
+  vox.setLeafSize(0.2f, 0.2f, 0.2f); // set Grid Size(0.4m)
   vox.filter(voxelCloud);
 
   //passthrough===============
@@ -109,10 +111,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   std::vector<pcl::PointIndices> clusterIndices;
 
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_left;
-  ec_left.setClusterTolerance(0.6); // set distance threshold = 0.9m
+  ec_left.setClusterTolerance(DISTANCE_THRESHOLD); // set distance threshold = 0.9m
 
   ec_left.setMinClusterSize(2);   // set Minimum Cluster Size
-  ec_left.setMaxClusterSize(100); // set Maximum Cluster Size
+  ec_left.setMaxClusterSize(10); // set Maximum Cluster Size
   ec_left.setSearchMethod(kdtree);
   ec_left.setInputCloud(passCloudLeft.makeShared());
   ec_left.extract(clusterIndices);
@@ -134,8 +136,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   kdtree->setInputCloud(passCloudRight.makeShared());
 
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_right;
-  ec_right.setClusterTolerance(0.6); // set distance threshold = 0.9m
-
+  ec_right.setClusterTolerance(DISTANCE_THRESHOLD); // set distance threshold = 0.9m
+  
   ec_right.setMinClusterSize(2);   // set Minimum Cluster Size
   ec_right.setMaxClusterSize(100); // set Maximum Cluster Size
   ec_right.setSearchMethod(kdtree);
