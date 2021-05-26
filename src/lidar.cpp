@@ -112,8 +112,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // TODO : change cloud 
   LineComponent lineComponent = getLine(filteredCloud);
   
+  ROS_INFO("w0 %f", lineComponent.w0);
+  ROS_INFO("w1 %f", lineComponent.w1);
 
-  if (abs(lineComponent.w0) < 0.001){
+  if (isnan(lineComponent.w0) || isnan(lineComponent.w1)){
     line.color.b = 1.0;
     ROS_INFO("=======slope 0 !!!!!!!! %f ===========", lineComponent.w0);
   } else {
@@ -129,10 +131,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     p2.z = 0;
 
     line.points.push_back(p2);
+    line_pub.publish(line);
   }
 
 
-  line_pub.publish(line);
   // draw line end ==========================
 
 
