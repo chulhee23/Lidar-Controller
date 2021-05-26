@@ -96,9 +96,12 @@ ros::Publisher del_pub;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
-  sensor_msgs::PointCloud inputCloud;
+  sensor_msgs::PointCloud msgCloud;
   laser_geometry::LaserProjection projector_;
-  projector_.projectLaser(*scan, inputCloud);
+  projector_.projectLaser(*scan, msgCloud);
+
+  pcl::PointCloud<pcl::PointXYZ> inputCloud;
+  pcl::fromROSMsg(msgCloud, inputCloud);
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
@@ -107,6 +110,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   //Voxelization -----------
   pcl::VoxelGrid<pcl::PointXYZ> vox;
+
+  // sensor_msgs 
   vox.setInputCloud(inputCloud.makeShared());
   vox.setLeafSize(0.4f, 0.4f, 0.4f); // set Grid Size(0.4m)
   vox.filter(voxelCloud);
