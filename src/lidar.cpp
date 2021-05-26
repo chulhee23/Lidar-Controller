@@ -17,9 +17,13 @@
 
 
 #define FORWARD_RANGE 2
-#define WIDTH 1
+#define WIDTH 1.5
+#define WIDTH_Y_START 0.5
 
 ros::Publisher point_pub;
+ros::Publisher left_pub;
+ros::Publisher right_pub;
+
 ros::Publisher line_pub;
 ros::Publisher del_pub;
 
@@ -70,20 +74,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   pcl::PassThrough<pcl::PointXYZ> pass;
   pass.setInputCloud(voxelCloud.makeShared());
-  pass.setFilterFieldName("x"); // axis y
-  pass.setFilterLimits(-1.5, 1.5);
+  pass.setFilterFieldName("x");
+  pass.setFilterLimits(-FORWARD_RANGE, 0);
   pass.setFilterLimitsNegative(false);
   pass.filter(tmpCloud);
 
   pass.setInputCloud(tmpCloud.makeShared());
   pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(0, 1.5);
+  pass.setFilterLimits(WIDTH_Y_START, WIDTH);
   pass.setFilterLimitsNegative(false);
   pass.filter(passCloudLeft);
 
   pass.setInputCloud(tmpCloud.makeShared());
   pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(-1.5, 0);
+  pass.setFilterLimits(-WIDTH, -WIDTH_Y_START);
   pass.setFilterLimitsNegative(false);
   pass.filter(passCloudRight);
 
@@ -196,12 +200,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   sensor_msgs::PointCloud2 outputRight;
   
   pcl::toROSMsg(filteredLeft, outputLeft);
-  output.header.frame_id = "/map";
-  pub.publish(outputLeft);
+  outputLeft.header.frame_id = "/map";
+  left_pub.publish(outputLeft);
   
-  pcl::toROSMsg(filteredLeft, outputRight);
-  output.header.frame_id = "/map";
-  pub.publish(outputRight);
+  pcl::toROSMsg(filteredRight, outputRight);
+  outputRight.header.frame_id = "/map";
+  right_pub.publish(outputRight);
 }
 
 int main(int argc, char **argv)
@@ -218,6 +222,10 @@ int main(int argc, char **argv)
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
   
   point_pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
+
+  left_pub = nh.advertise<sensor_msgs::PointCloud2>("/leftLine", 1);
+  right_pub = nh.advertise<sensor_msgs::PointCloud2>("/rightLine", 1);
+
 
   line_pub = nh.advertise<visualization_msgs::Marker>("/line", 1);
   // for Arduino publish end ================================
