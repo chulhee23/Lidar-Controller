@@ -14,8 +14,9 @@
 #include "gradientDescent.cpp"
 
 
-#define FORWARD_RANGE 5
-#define WIDTH 1.5
+#define FORWARD_RANGE 2
+#define WIDTH 1
+
 ros::Publisher pub;
 ros::Publisher del_pub;
 
@@ -127,7 +128,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   vox.filter(voxelCloud);
 
   //passthrough===============
-  pcl::PointCloud<pcl::PointXYZ> passCloud;
+  pcl::PointCloud<pcl::PointXYZ> filter;
+  pcl::PointCloud<pcl::PointXYZ> filteredCloud;
   
   pcl::PassThrough<pcl::PointXYZ> pass;
 
@@ -137,34 +139,22 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pass.setFilterLimits(-FORWARD_RANGE, 0);
   pass.setFilterLimitsNegative(false);
 
+  
+  pass.filter(filter); // pass 로 filtering
+
+  pass.setInputCloud(filter.makeShared());
+  
   pass.setFilterFieldName("y"); // axis y
   pass.setFilterLimits(-WIDTH, WIDTH);  
   pass.setFilterLimitsNegative(false);
   
-  
-  pass.filter(passCloud); // pass 로 filtering
+  pass.filter(filteredCloud); // pass 로 filtering
 
   
 
+  // clustering start====
 
 
-  // rviz test
-
-  sensor_msgs::PointCloud2 output;
-  pcl::toROSMsg(passCloud, output);
-  output.header.frame_id = "/map";
-  pub.publish(output);
-
-
-
-  // pass.setInputCloud(passCloud1.makeShared());
-  // pass.filter(passCloud2);
-
-  // passthrough end =====================
-  // filter ROI end ++++++++++++++++++++++++++
-
-  // clustering start ======================
-  // TODO
 
   pcl::PointCloud<pcl::PointXYZ> kdCloud;
 
@@ -172,8 +162,17 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // clustering end ======================
 
-  // getDelta(msgCloud);
 
+  // rviz test
+
+  sensor_msgs::PointCloud2 output;
+
+  pcl::toROSMsg(filteredCloud, output);
+  output.header.frame_id = "/map";
+  pub.publish(output);
+
+
+  // getDelta(msgCloud);
 
 
   // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
@@ -206,29 +205,21 @@ int main(int argc, char **argv)
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
   
+  pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
 
   // for Arduino publish end ================================
 
   ros::Subscriber lidar_sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1000, scanCallback);
-
-  // while Lidar On
-  // 1. get slope by gradient descent
-  
-
-  // 2. publish delta value to Arduino
-
-
-  // ros::spin();
   
   std_msgs::Float64 velocity;
   velocity.data = 4; 
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
   
-  while(ros::ok()){
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-
+  // while(ros::ok()){
+  //   ros::spinOnce();
+  //   loop_rate.sleep();
+  // }
+  ros::spin();
   return 0;
 }
