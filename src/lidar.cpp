@@ -163,6 +163,77 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // clustering end ======================
 
 
+  // draw line ==========================
+  visualization_msgs::Marker line;
+  line.header.frame_id = "map";
+  line.header.stamp = ros::Time::now();
+  line.ns = "points_and_lines";
+  line.id = 0;
+  line.type = visualization_msgs::Marker::LINE_LIST;
+  line.action = visualization_msgs::Marker::ADD;
+
+  line.scale.x = 0.1;
+  line.scale.y = 0;
+  line.scale.z = 0;
+
+  line.color.a = 1.0;
+  line.color.r = 1.0;
+
+  line.pose.orientation.w = 1.0;
+
+  // TODO: change cloud
+  int cloud_size = filteredCloud.points.size();
+  float w_init[2] = {1, 1};
+  float alpha = 0.01;
+  float i_max = 1000;
+  float eps = 0.01;
+  int index = 0;
+  vector<pair<float, float>> w_i = {{0, 0}, {0, 0}, {0, 0}};
+
+  w_i[0] = pair<float, float>(w_init[0], w_init[1]);
+
+  for (int i = 1; i < i_max; i++)
+  {
+    index++;
+    w_i.push_back(pair<float, float>(0, 0));
+    float w_x = w_i[i - 1].first;
+    float w_y = w_i[i - 1].second;
+    float tmp[2] = {w_x, w_y};
+    Diff dmse = dmse_line(inputCloud, tmp, cloud_size);
+
+    // w_i[i] = (~~, ~~~)
+    // 함수 생성해서 dmse 가져오기 --> 우선 dd_w0/dd_w1 사용
+    float ca = w_i[i - 1].first - alpha * dmse.x;
+    float da = w_i[i - 1].second - alpha * dmse.y;
+    w_i[i] = pair<float, float>(ca, da);
+    // cout << w_i[i].first << " // " << w_i[i].second << endl;
+    // if max(np.absolute(dmse)) < eps: // 종료판정
+    float max_dmse = max(abs(dmse.x), abs(dmse.y));
+    // cout << max_dmse << endl;
+    if (max_dmse < eps)
+    {
+      cout << dmse.x << " " << dmse.y << endl;
+      break;
+    }
+  }
+  float w0 = w_i[index].first;
+  float w1 = w_i[index].second;
+  geometry_msgs::Point p1;
+  p1.x = -5;
+  p1.y = w0 * (-5) + w1;
+  p1.z = 0;
+  line.points.push_back(p1);
+
+  geometry_msgs::Point p2;
+  p2.x = 5;
+  p2.y = w0 * 5 + w1;
+  p2.z = 0;
+  line.points.push_back(p2);
+
+  pub.publish(line);
+  // draw line end ==========================
+
+
   // rviz test
 
   sensor_msgs::PointCloud2 output;
