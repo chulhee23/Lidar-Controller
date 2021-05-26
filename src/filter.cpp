@@ -9,7 +9,8 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 
-ros::Publisher pub;
+ros::Publisher pubLeft;
+ros::Publisher pubRight;
 
 laser_geometry::LaserProjection projector;
 
@@ -33,7 +34,8 @@ void callbackFcn(const sensor_msgs::LaserScan::ConstPtr &msg)
 
   //passthrough
   pcl::PointCloud<pcl::PointXYZ> passCloud1;
-  pcl::PointCloud<pcl::PointXYZ> passCloud2;
+  pcl::PointCloud<pcl::PointXYZ> passCloudLeft;
+  pcl::PointCloud<pcl::PointXYZ> passCloudRight;
 
   pcl::PassThrough<pcl::PointXYZ> pass;
 
@@ -45,35 +47,47 @@ void callbackFcn(const sensor_msgs::LaserScan::ConstPtr &msg)
 
   pass.setInputCloud(passCloud1.makeShared());
   pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(-1.5, 1.5);
+  pass.setFilterLimits(0, 1.5);
   pass.setFilterLimitsNegative(false);
-  pass.filter(passCloud2);
+  pass.filter(passCloudLeft);
+
+  pass.setInputCloud(passCloud1.makeShared());
+  pass.setFilterFieldName("y"); // axis y
+  pass.setFilterLimits(-1.5, 0);
+  pass.setFilterLimitsNegative(false);
+  pass.filter(passCloudRight);
 
   //kdtree
 
-  pcl::PointCloud<pcl::PointXYZ> kdCloud;
+  /*pcl::PointCloud<pcl::PointXYZ> kdCloud;
 
   pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-  kdtree.setInputCloud(passCloud2.makeShared());
+  kdtree.setInputCloud (passCloud3.makeShared());  
 
   pcl::PointXYZ searchPoint; // set Search Point : (0, 0, 0)
   searchPoint.x = 0;
   searchPoint.y = 0;
   searchPoint.z = 0;
 
-  std::vector<int> pointIdxRadiusSearch;
-  std::vector<float> pointRadiusSquaredDistance;
+  std::vector<int> pointIdxRadiusSearch;	//index
+  std::vector<float> pointRadiusSquaredDistance;  //distance
 
-  float radius = 0.2; // set searching radius size = 0.2m
-  if (kdtree.radiusSearch(searchPoint, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
-    for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
-      kdCloud.points.push_back(passCloud2.points[pointIdxRadiusSearch[i]]);
+  float radius = 3; // set searching radius size = 3m
+  if(kdtree.radiusSearch(searchPoint, radius,     pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+  for(int i = 0; i < pointIdxRadiusSearch.size (); ++i)
+    kdCloud.points.push_back(passCloud3.points[pointIdxRadiusSearch[i]]);
+ */
+  sensor_msgs::PointCloud2 outputLeft;
+  sensor_msgs::PointCloud2 outputRight;
 
-  sensor_msgs::PointCloud2 output;
-  pcl::toROSMsg(passCloud2, output);
-  output.header.frame_id = "/laser";
+  pcl::toROSMsg(passCloudLeft, outputLeft);
+  pcl::toROSMsg(passCloudRight, outputRight);
 
-  pub.publish(output);
+  outputLeft.header.frame_id = "/laser";
+  outputRight.header.frame_id = "/laser";
+
+  pubLeft.publish(outputLeft);
+  pubRight.publish(outputRight);
 }
 
 int main(int argc, char **argv)
@@ -81,7 +95,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "filter");
   ros::NodeHandle nh;
 
-  // << Subscribe Topict >>
+  // << Subscribe Topic >>
   // topic name : /scan
   // topic type : sensor_msgs::LaserScan
   ros::Subscriber sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, callbackFcn);
@@ -89,7 +103,9 @@ int main(int argc, char **argv)
   // << Publish Topic >>
   // topic name : /passPC
   // topic type : sensor_msgs::PointCloud2
-  pub = nh.advertise<sensor_msgs::PointCloud2>("/filterPC", 1);
+  pubLeft = nh.advertise<sensor_msgs::PointCloud2>("/filterLeft", 1);
+
+  pubRight = nh.advertise<sensor_msgs::PointCloud2>("/filterRight", 1);
 
   ros::spin();
   return 0;

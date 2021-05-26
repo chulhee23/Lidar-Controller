@@ -22,6 +22,11 @@ ros::Publisher line_pub;
 ros::Publisher del_pub;
 
 
+float get_delta(float lw0, float lw1, float rw0, float rw1){
+  
+
+}
+
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
@@ -56,40 +61,101 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   vox.filter(voxelCloud);
 
   //passthrough===============
-  pcl::PointCloud<pcl::PointXYZ> filter;
-  pcl::PointCloud<pcl::PointXYZ> filteredCloud;
-  
+  pcl::PointCloud<pcl::PointXYZ> tmpCloud;
+  pcl::PointCloud<pcl::PointXYZ> passCloudLeft;
+  pcl::PointCloud<pcl::PointXYZ> passCloudRight;
+
+
   pcl::PassThrough<pcl::PointXYZ> pass;
-
   pass.setInputCloud(voxelCloud.makeShared());
-  
-  pass.setFilterFieldName("x"); // axis x
-  pass.setFilterLimits(-FORWARD_RANGE, 0);
+  pass.setFilterFieldName("x"); // axis y
+  pass.setFilterLimits(-1.5, 1.5);
   pass.setFilterLimitsNegative(false);
+  pass.filter(tmpCloud);
 
-  
-  pass.filter(filter); // pass 로 filtering
-
-  pass.setInputCloud(filter.makeShared());
-  
+  pass.setInputCloud(tmpCloud.makeShared());
   pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(-WIDTH, WIDTH);  
+  pass.setFilterLimits(0, 1.5);
   pass.setFilterLimitsNegative(false);
+  pass.filter(passCloudLeft);
+
+  pass.setInputCloud(tmpCloud.makeShared());
+  pass.setFilterFieldName("y"); // axis y
+  pass.setFilterLimits(-1.5, 0);
+  pass.setFilterLimitsNegative(false);
+  pass.filter(passCloudRight);
+
+  // clustering start=====================
   
-  pass.filter(filteredCloud); // pass 로 filtering
+  // left+++++++++++++++++++++++++++++++++++++
+  pcl::PointCloud<pcl::PointXYZ> filteredLeft;
 
-  
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+  kdtree->setInputCloud(passCloudLeft.makeShared());
+  std::vector<pcl::PointIndices> clusterIndices;
 
-  // clustering start====
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+  ec.setClusterTolerance(0.6); // set distance threshold = 0.9m
+
+  ec.setMinClusterSize(2);   // set Minimum Cluster Size
+  ec.setMaxClusterSize(100); // set Maximum Cluster Size
+  ec.setSearchMethod(kdtree);
+  ec.setInputCloud(passCloudLeft.makeShared());
+  ec.extract(clusterIndices);
+
+  std::vector<pcl::PointIndices>::const_iterator it;
+
+  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
+  {
+
+    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+      filteredLeft.push_back(passCloudLeft[*pit]);
+  }
+  // left end +++++++++++++++++++++++++++++++++++++
 
 
+  // right start -----------------------
+  pcl::PointCloud<pcl::PointXYZ> filteredRight;
 
-  pcl::PointCloud<pcl::PointXYZ> kdCloud;
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+  kdtree->setInputCloud(passCloudRight.makeShared());
 
-  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  std::vector<pcl::PointIndices> clusterIndices;
+
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+  ec.setClusterTolerance(0.6); // set distance threshold = 0.9m
+
+  ec.setMinClusterSize(2);   // set Minimum Cluster Size
+  ec.setMaxClusterSize(100); // set Maximum Cluster Size
+  ec.setSearchMethod(kdtree);
+  ec.setInputCloud(passCloudRight.makeShared());
+  ec.extract(clusterIndices);
+
+  std::vector<pcl::PointIndices>::const_iterator it;
+
+  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
+  {
+    
+
+    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+      filteredRight.push_back(passCloudRight[*pit]);
+  }
+
+  // right end -----------------------
+
 
   // clustering end ======================
+  LineComponent leftLine = getLine(filteredLeft);
+  LineComponent rightLine = getLine(filteredRight);
 
+  ROS_INFO("left w0 %f", leftLine.w0);
+  ROS_INFO("left w1 %f", leftLine.w1);
+  ROS_INFO("right w0 %f", rightLine.w0);
+  ROS_INFO("right w1 %f", rightLine.w1);
+
+  // control delta value
+  delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
+  del_pub.publish(delta);
 
   // draw line ==========================
   visualization_msgs::Marker line;
@@ -99,40 +165,33 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   line.id = 0;
   line.type = visualization_msgs::Marker::LINE_LIST;
   line.action = visualization_msgs::Marker::ADD;
-
   line.scale.x = 0.05;
   line.scale.y = 0;
   line.scale.z = 0;
-
   line.color.a = 1.0;
   line.color.r = 1.0;
-
   line.pose.orientation.w = 1.0;
 
-  // TODO : change cloud 
-  LineComponent lineComponent = getLine(filteredCloud);
-  
-  ROS_INFO("w0 %f", lineComponent.w0);
-  ROS_INFO("w1 %f", lineComponent.w1);
 
-  if (isnan(lineComponent.w0) || isnan(lineComponent.w1)){
-    line.color.b = 1.0;
-    ROS_INFO("=======slope 0 !!!!!!!! %f ===========", lineComponent.w0);
-  } else {
-    geometry_msgs::Point p1;
-    p1.x = -5;
-    p1.y = lineComponent.w0 * (-5) + lineComponent.w1;
-    p1.z = 0;
+  LineComponent lines[2]  = {leftLine, rightLine};
+  for(int i = 0 ; i < 2; i++){
+    LineComponent tmp_line = lines[i];
+    if (isnan(tmp_line.w0) || isnan(tmp_line.w1))
+    {
+      ROS_INFO("======= slope 0 !!!!!!!! %f ===========", tmp_line.w0);
+    } else {
+      geometry_msgs::Point p1;
+      p1.x = -5; p1.y = tmp_line.w0 * (-5) + tmp_line.w1; p1.z = 0;
 
-    line.points.push_back(p1);
-    geometry_msgs::Point p2;
-    p2.x = 5;
-    p2.y = lineComponent.w0 * (5) + lineComponent.w1;
-    p2.z = 0;
+      line.points.push_back(p1);
+      geometry_msgs::Point p2;
+      p2.x = 1; p2.y = tmp_line.w0 * (1) + tmp_line.w1; p2.z = 0;
 
-    line.points.push_back(p2);
-    line_pub.publish(line);
+      line.points.push_back(p2);
+      line_pub.publish(tmp_line);
+    }
   }
+
 
 
   // draw line end ==========================
@@ -145,27 +204,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pcl::toROSMsg(filteredCloud, output);
   output.header.frame_id = "/map";
   point_pub.publish(output);
-
-
-  // getDelta(msgCloud);
-
-
-  // float slope = getGradientDescent(msgCloud.points.x, msgCloud.points.y);
-  
-  std_msgs::Float64 delta;
-  delta.data = 0.25;
-  // delta = getDelta(slope);
-  
-  // data > 0 -> turn left
-  // data < 0 -> turn right
-  
-  
-
-  ROS_INFO("DELTA %f", delta.data);
-
-  del_pub.publish(delta);
-
-}
+  }
 
 int main(int argc, char **argv)
 {
