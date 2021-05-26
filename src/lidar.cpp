@@ -29,8 +29,16 @@ ros::Publisher del_pub;
 
 
 float get_delta(float lw0, float lw1, float rw0, float rw1){
+  float del = 0;
   
-
+  if(((lw0 + rw0)/2) > 0.28){
+    del = 0.3;
+  } 
+  else if (((lw0 + rw0)/2) < -0.28) {
+    del = -0.3;
+  }
+  
+  return del;
 }
 
 
@@ -158,6 +166,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   std_msgs::Float64 delta;
   delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
   del_pub.publish(delta);
+  
+  ROS_INFO("======delta %f =========", delta);
 
   // draw line ==========================
   visualization_msgs::Marker line;
