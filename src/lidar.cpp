@@ -8,6 +8,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/kdtree/kdtree_flann.h>
+
+#include <pcl/segmentation/extract_clusters.h>
 #include <pcl/point_cloud.h>
 #include <vector>
 
@@ -94,14 +96,14 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   kdtree->setInputCloud(passCloudLeft.makeShared());
   std::vector<pcl::PointIndices> clusterIndices;
 
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance(0.6); // set distance threshold = 0.9m
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_left;
+  ec_left.setClusterTolerance(0.6); // set distance threshold = 0.9m
 
-  ec.setMinClusterSize(2);   // set Minimum Cluster Size
-  ec.setMaxClusterSize(100); // set Maximum Cluster Size
-  ec.setSearchMethod(kdtree);
-  ec.setInputCloud(passCloudLeft.makeShared());
-  ec.extract(clusterIndices);
+  ec_left.setMinClusterSize(2);   // set Minimum Cluster Size
+  ec_left.setMaxClusterSize(100); // set Maximum Cluster Size
+  ec_left.setSearchMethod(kdtree);
+  ec_left.setInputCloud(passCloudLeft.makeShared());
+  ec_left.extract(clusterIndices);
 
   std::vector<pcl::PointIndices>::const_iterator it;
 
@@ -120,18 +122,15 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
   kdtree->setInputCloud(passCloudRight.makeShared());
 
-  std::vector<pcl::PointIndices> clusterIndices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_right;
+  ec_right.setClusterTolerance(0.6); // set distance threshold = 0.9m
 
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance(0.6); // set distance threshold = 0.9m
+  ec_right.setMinClusterSize(2);   // set Minimum Cluster Size
+  ec_right.setMaxClusterSize(100); // set Maximum Cluster Size
+  ec_right.setSearchMethod(kdtree);
+  ec_right.setInputCloud(passCloudRight.makeShared());
+  ec_right.extract(clusterIndices);
 
-  ec.setMinClusterSize(2);   // set Minimum Cluster Size
-  ec.setMaxClusterSize(100); // set Maximum Cluster Size
-  ec.setSearchMethod(kdtree);
-  ec.setInputCloud(passCloudRight.makeShared());
-  ec.extract(clusterIndices);
-
-  std::vector<pcl::PointIndices>::const_iterator it;
 
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {
@@ -198,13 +197,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
 
   // rviz test
-
-  sensor_msgs::PointCloud2 output;
-
-  pcl::toROSMsg(filteredCloud, output);
-  output.header.frame_id = "/map";
-  point_pub.publish(output);
-  }
+}
 
 int main(int argc, char **argv)
 {
