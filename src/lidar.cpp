@@ -90,16 +90,14 @@ ros::Publisher del_pub;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
-  sensor_msgs::PointCloud msgCloud;
+  sensor_msgs::PointCloud inputCloud;
   laser_geometry::LaserProjection projector_;
-  projector_.projectLaser(*scan, msgCloud);
+  projector_.projectLaser(*scan, inputCloud);
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
-  pcl::PointCloud<pcl::PointXYZ> inputCloud;
+  
   pcl::PointCloud<pcl::PointXYZ> voxelCloud;
-
-  pcl::fromROSMsg(msgCloud, inputCloud); // msgCloud -> inputCloud
 
   //Voxelization -----------
   pcl::VoxelGrid<pcl::PointXYZ> vox;
