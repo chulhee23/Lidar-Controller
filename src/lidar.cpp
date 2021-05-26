@@ -131,11 +131,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   ec_right.setInputCloud(passCloudRight.makeShared());
   ec_right.extract(clusterIndices);
 
-
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {
     
-
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       filteredRight.push_back(passCloudRight[*pit]);
   }
@@ -153,6 +151,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   ROS_INFO("right w1 %f", rightLine.w1);
 
   // control delta value
+
+  std_msgs::Float64 delta;
   delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
   del_pub.publish(delta);
 
