@@ -190,8 +190,18 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     }
   }
 
-  point_pub.publish(filteredLeft);
-  point_pub.publish(filteredright);
+
+  //
+  sensor_msgs::PointCloud2 outputLeft;
+  sensor_msgs::PointCloud2 outputRight;
+  
+  pcl::toROSMsg(filteredLeft, outputLeft);
+  output.header.frame_id = "/map";
+  pub.publish(outputLeft);
+  
+  pcl::toROSMsg(filteredLeft, outputRight);
+  output.header.frame_id = "/map";
+  pub.publish(outputRight);
 }
 
 int main(int argc, char **argv)
