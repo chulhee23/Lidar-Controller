@@ -113,9 +113,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   LineComponent lineComponent = getLine(filteredCloud);
   
 
-  if (lineComponent.w0 < 0.001){
+  if (abs(lineComponent.w0) < 0.001){
     line.color.b = 1.0;
-    ROS_INFO("=======slope 0 !!!!!!!! %f ===========", lineComponent.w0)
+    ROS_INFO("=======slope 0 !!!!!!!! %f ===========", lineComponent.w0);
   } else {
     geometry_msgs::Point p1;
     p1.x = -5;

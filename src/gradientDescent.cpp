@@ -15,7 +15,7 @@ using namespace std;
 struct LineComponent {
   float w0;
   float w1;
-}
+};
 
 struct Diff
 {
