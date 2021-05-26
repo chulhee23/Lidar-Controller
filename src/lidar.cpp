@@ -183,19 +183,15 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
       line.points.push_back(p1);
       geometry_msgs::Point p2;
-      p2.x = 1; p2.y = tmp_line.w0 * (1) + tmp_line.w1; p2.z = 0;
+      p2.x = 1; p2.y = tmp_line.w0 + tmp_line.w1; p2.z = 0;
 
       line.points.push_back(p2);
-      line_pub.publish(tmp_line);
+      line_pub.publish(line);
     }
   }
 
-
-
-  // draw line end ==========================
-
-
-  // rviz test
+  point_pub.publish(filteredLeft);
+  point_pub.publish(filteredright);
 }
 
 int main(int argc, char **argv)
