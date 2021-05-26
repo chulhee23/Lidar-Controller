@@ -119,13 +119,13 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   } else {
     geometry_msgs::Point p1;
     p1.x = -5;
-    p1.y = w0 * (-5) + w1;
+    p1.y = lineComponent.w0 * (-5) + lineComponent.w1;
     p1.z = 0;
 
     line.points.push_back(p1);
     geometry_msgs::Point p2;
     p2.x = 5;
-    p2.y = w0 * (5) + w1;
+    p2.y = lineComponent.w0 * (5) + lineComponent.w1;
     p2.z = 0;
 
     line.points.push_back(p2);
