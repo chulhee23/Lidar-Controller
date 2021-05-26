@@ -129,8 +129,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   
   pass.filter(passCloud); // pass 로 filtering
 
-  pass.setInputCloud(passCloud1.makeShared());
-  pass.filter(passCloud2);
+  // pass.setInputCloud(passCloud1.makeShared());
+  // pass.filter(passCloud2);
 
   // passthrough end =====================
   // filter ROI end ++++++++++++++++++++++++++
