@@ -164,16 +164,3 @@
 
 //   pub.publish(line);
 // }
-
-// int main(int argc, char **argv)
-// {
-//   ros::init(argc, argv, "laneFitting");
-//   ros::NodeHandle nh;
-
-//   pub = nh.advertise<visualization_msgs::Marker>("/lane", 1);
-
-//   ros::Subscriber lane_sub = nh.subscribe("/input", 10, msgCallback);
-
-//   ros::spin();
-//   return 0;
-// }

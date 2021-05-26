@@ -144,6 +144,19 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   
   pass.filter(passCloud); // pass 로 filtering
 
+  
+
+
+
+  // rviz test
+
+  sensor_msgs::PointCloud2 output;
+  pcl::toROSMsg(passCloud, output);
+  output.header.frame_id = "/map";
+  pub.publish(output);
+
+
+
   // pass.setInputCloud(passCloud1.makeShared());
   // pass.filter(passCloud2);
 
