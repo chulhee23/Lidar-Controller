@@ -98,10 +98,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
   sensor_msgs::PointCloud msgCloud;
   laser_geometry::LaserProjection projector_;
-  projector_.projectLaser(*scan, msgCloud);
 
+  projector_.projectLaser(*scan, msgCloud);
+  
   pcl::PointCloud<pcl::PointXYZ> inputCloud;
-  pcl::fromROSMsg(msgCloud, inputCloud);
+  inputCloud.width = msgCloud.points.size();
+  inputCloud.height = 1;
+  inputCloud.points.resize(inputCloud.width * inputCloud.height);
+  for (int i = 0; i < msgCloud.points.size(); i++)
+  {
+    inputCloud.points[i].x = msgCloud.points[i].x;
+    inputCloud.points[i].y = msgCloud.points[i].y;
+    inputCloud.points[i].z = 0;
+  }
+  // pcl::fromROSMsg(msgCloud, inputCloud);
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
