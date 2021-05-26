@@ -119,7 +119,6 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // right start -----------------------
   pcl::PointCloud<pcl::PointXYZ> filteredRight;
 
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
   kdtree->setInputCloud(passCloudRight.makeShared());
 
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_right;
