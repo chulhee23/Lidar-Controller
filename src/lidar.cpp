@@ -17,7 +17,8 @@
 #define FORWARD_RANGE 2
 #define WIDTH 1
 
-ros::Publisher pub;
+ros::Publisher point_pub;
+ros::Publisher line_pub;
 ros::Publisher del_pub;
 
 
@@ -199,20 +200,14 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     float w_x = w_i[i - 1].first;
     float w_y = w_i[i - 1].second;
     float tmp[2] = {w_x, w_y};
-    Diff dmse = dmse_line(inputCloud, tmp, cloud_size);
+    Diff dmse = dmse_line(filteredCloud, tmp, cloud_size);
 
-    // w_i[i] = (~~, ~~~)
-    // 함수 생성해서 dmse 가져오기 --> 우선 dd_w0/dd_w1 사용
     float ca = w_i[i - 1].first - alpha * dmse.x;
     float da = w_i[i - 1].second - alpha * dmse.y;
     w_i[i] = pair<float, float>(ca, da);
-    // cout << w_i[i].first << " // " << w_i[i].second << endl;
-    // if max(np.absolute(dmse)) < eps: // 종료판정
     float max_dmse = max(abs(dmse.x), abs(dmse.y));
-    // cout << max_dmse << endl;
     if (max_dmse < eps)
     {
-      cout << dmse.x << " " << dmse.y << endl;
       break;
     }
   }
@@ -230,7 +225,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   p2.z = 0;
   line.points.push_back(p2);
 
-  pub.publish(line);
+  line_pub.publish(line);
   // draw line end ==========================
 
 
@@ -240,7 +235,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   pcl::toROSMsg(filteredCloud, output);
   output.header.frame_id = "/map";
-  pub.publish(output);
+  point_pub.publish(output);
 
 
   // getDelta(msgCloud);
@@ -276,8 +271,9 @@ int main(int argc, char **argv)
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
   
-  pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
+  point_pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
 
+  line_pub = nh.advertise<visualization_msgs::Marker>("/line", 1);
   // for Arduino publish end ================================
 
   ros::Subscriber lidar_sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1000, scanCallback);

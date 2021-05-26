@@ -81,7 +81,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "filter");
   ros::NodeHandle nh;
 
-  // << Subscribe Topic >>
+  // << Subscribe Topict >>
   // topic name : /scan
   // topic type : sensor_msgs::LaserScan
   ros::Subscriber sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1, callbackFcn);

@@ -124,7 +124,7 @@ void msgCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
     // cout << max_dmse << endl;
     if (max_dmse < eps)
     {
-      cout << dmse.x << " " << dmse.y << endl;
+      // cout << dmse.x << " " << dmse.y << endl;
       break;
     }
   }
@@ -132,17 +132,17 @@ void msgCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
   float w0 = w_i[index].first;
   float w1 = w_i[index].second;
 
-  geometry_msgs::Point p1;
-  p1.x = -5;
-  p1.y = w0 * (-5) + w1;
-  p1.z = 0;
-  line.points.push_back(p1);
+  // geometry_msgs::Point p1;
+  // p1.x = -5;
+  // p1.y = w0 * (-5) + w1;
+  // p1.z = 0;
+  // line.points.push_back(p1);
 
-  geometry_msgs::Point p2;
-  p2.x = 5;
-  p2.y = w0 * 5 + w1;
-  p2.z = 0;
-  line.points.push_back(p2);
+  // geometry_msgs::Point p2;
+  // p2.x = 5;
+  // p2.y = w0 * 5 + w1;
+  // p2.z = 0;
+  // line.points.push_back(p2);
 
-  pub.publish(line);
+  // pub.publish(line);
 }
