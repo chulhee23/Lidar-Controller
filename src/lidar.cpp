@@ -196,16 +196,18 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
 
   ROS_INFO("left clusterIndices %i", clusterIndices.size());
+
+  // clusterIndices sort descending
+  std::sort(clusterIndices.begin(), clusterIndices.end(), [](const vector<int> &a, const vector<int> &b){ return a.size() > b.size(); });
+
   int clusterN = 1;
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {  
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       clusteredLeft.push_back(kdCloudLeft[*pit]);
-
-    if (clusterN > 1)
-      break;
     
-    clusterN++;
+    break;
+
   }
 
   // clustering end ======================
