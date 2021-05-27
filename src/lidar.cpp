@@ -154,7 +154,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
   // size < min_value -> noise -> not cluster
-  ec.setMinClusterSize(8);    // set Minimum Cluster Size
+  ec.setMinClusterSize(6);    // set Minimum Cluster Size
   ec.setMaxClusterSize(1000); // set Maximum Cluster Size
 
   ec.setSearchMethod(kdtree);
