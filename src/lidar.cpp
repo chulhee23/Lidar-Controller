@@ -143,6 +143,41 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   point_pub.publish(filteredOutput);
   // =============================
 
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+  kdtree->setInputCloud(passCloud.makeShared());
+  // euclidean clustering start
+  std::vector<pcl::PointIndices> clusterIndices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+
+  ec.setClusterTolerance(1.5); // set distance threshold = 1.5m
+  ec.setMinClusterSize(2);    // set Minimum Cluster Size
+  // ec.setMaxClusterSize(25000); // set Maximum Cluster Size
+
+  ec.setSearchMethod(kdtree);
+  ec.setInputCloud(passCloud.makeShared());
+
+  // return result
+  ec.extract(clusterIndices);
+  
+  std::vector<pcl::PointIndices>::const_iterator it;
+  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
+  {
+    pcl::PointCloud<pcl::PointXYZ> clustered;
+    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+      clustered.push_back(inputCloud[*pit]);
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(clustered, output);
+    output.header.frame_id = "/map";
+
+    // current: only one - left or right
+    clusterN == 1 ? left_pub.publish(output) : right_pub.publish(output);
+
+    clusterN++;
+  }
+
+  // =======
+
   pcl::PointCloud<pcl::PointXYZ> filteredLeft;
   pcl::PointCloud<pcl::PointXYZ> filteredRight;
 
