@@ -185,23 +185,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
   // size < min_value -> noise -> not cluster
-  ec.setMinClusterSize(2);    // set Minimum Cluster Size
+  ec.setMinClusterSize(6);    // set Minimum Cluster Size
   ec.setMaxClusterSize(1000); // set Maximum Cluster Size
 
   ec.setSearchMethod(kdtree);
   ec.setInputCloud(kdCloudLeft.makeShared());
 
   ec.extract(clusterIndices);
-  std::vector<pcl::PointIndices>::const_iterator it;
+
   pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
 
   ROS_INFO("left clusterIndices %i", clusterIndices.size());
 
-  // clusterIndices sort descending
-  std::sort(clusterIndices.begin(), clusterIndices.end(), [](const vector<int> &a, const vector<int> &b){ return a.size() > b.size(); });
-
-  int clusterN = 1;
-  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
+  // int clusterN = 1;
+  for (std::vector<pcl::PointIndices>::const_iterator it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {  
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       clusteredLeft.push_back(kdCloudLeft[*pit]);
