@@ -174,7 +174,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
       kdCloudRight.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
   ROS_INFO("Kd Left Cloud Size %i", kdCloudLeft.size());
-  ROS_INFO("Kd Right Cloud Size %i", ldCloudRight.size());
+  ROS_INFO("Kd Right Cloud Size %i", kdCloudRight.size());
   // =======
 
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
