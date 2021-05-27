@@ -153,7 +153,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   kdtreeRight.setInputCloud(passCloud.makeShared());
 
   pcl::PointXYZ searchPointLeft; // set Search Left Point : (0, -2, 0)
-  searchPointLeft.x = -1;
+  searchPointLeft.x = 0;
   searchPointLeft.y = -1;
   searchPointLeft.z = 0;
 
