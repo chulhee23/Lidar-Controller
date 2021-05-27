@@ -115,7 +115,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // sensor_msgs 
   vox.setInputCloud(inputCloud.makeShared());
-  vox.setLeafSize(0.2f, 0.2f, 0.2f); // set Grid Size(0.4m)
+  vox.setLeafSize(0.1f, 0.1f, 0.1f); // set Grid Size(0.4m)
   vox.filter(voxelCloud);
 
 
@@ -142,47 +142,38 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   filteredOutput.header.frame_id = "/map";
   point_pub.publish(filteredOutput);
   // =============================
+  pcl::PointCloud<pcl::PointXYZ> kdCloudLeft;
+  pcl::PointCloud<pcl::PointXYZ> kdCloudRight;
 
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  kdtree->setInputCloud(passCloud.makeShared());
-  // euclidean clustering start
-  std::vector<pcl::PointIndices> clusterIndices;
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtreeLeft;
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtreeRight;
 
-  ec.setClusterTolerance(0.5); // set distance threshold = 1.5m
-  ec.setMinClusterSize(2);    // set Minimum Cluster Size
-  // ec.setMaxClusterSize(25000); // set Maximum Cluster Size
+  kdtreeLeft.setInputCloud(passCloud.makeShared());
+  kdtreeRight.setInputCloud(passCloud.makeShared());
 
-  ec.setSearchMethod(kdtree);
-  ec.setInputCloud(passCloud.makeShared());
+  pcl::PointXYZ searchPointLeft; // set Search Left Point : (0, -2, 0)
+  searchPointLeft.x = 0;
+  searchPointLeft.y = -1;
+  searchPointLeft.z = 0;
 
-  // return result
-  ec.extract(clusterIndices);
-  int clusterN = 1;
-  ROS_INFO("======cluster Index size %i", clusterIndices.size());  
-  std::vector<pcl::PointIndices>::const_iterator it;
-  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
-  {
-    pcl::PointCloud<pcl::PointXYZ> clustered;
-    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      clustered.push_back(passCloud[*pit]);
-    
-    int cloud_size = clustered.points.size();
-    if (clusterN == 1){
-      ROS_INFO("============= n == 1===== %i", cloud_size);
-    } else {
-      ROS_INFO("============= n > 1===== %i", cloud_size);
-    }
+  pcl::PointXYZ searchPointRight; // set Search Right Point : (0, 2, 0)
+  searchPointRight.x = 0;
+  searchPointRight.y = 1;
+  searchPointRight.z = 0;
+  std::vector<int> pointIdxRadiusSearch;         //index
+  std::vector<float> pointRadiusSquaredDistance; //distance
 
-    sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(clustered, output);
-    output.header.frame_id = "/map";
+  float radius = 1.2; // set searching radius size = 2.2m
+  
+  if (kdtreeLeft.radiusSearch(searchPointLeft, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+    for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
+      kdCloudLeft.points.push_back(passCloud2.points[pointIdxRadiusSearch[i]]);
 
-    // current: only one - left or right
-    clusterN == 1 ? left_pub.publish(output) : right_pub.publish(output);
+  if (kdtreeRight.radiusSearch(searchPointRight, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+    for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
+      kdCloudRight.points.push_back(passCloud2.points[pointIdxRadiusSearch[i]]);
 
-    clusterN++;
-  }
+
 
   // =======
 
