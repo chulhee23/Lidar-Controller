@@ -1,17 +1,18 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <laser_geometry/laser_geometry.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
 #include <std_msgs/Float64.h>
+#include <vector>
 
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
+#include <pcl/filters/conditional_removal.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/point_cloud.h>
-#include <vector>
+
 
 #include "gradientDescent.cpp"
 
@@ -28,6 +29,49 @@ ros::Publisher right_pub;
 
 ros::Publisher line_pub;
 ros::Publisher del_pub;
+
+void drawLine(LineComponent leftLine, LineComponent rightLine){
+
+  visualization_msgs::Marker line;
+  line.header.frame_id = "map";
+  line.header.stamp = ros::Time::now();
+  line.ns = "points_and_lines";
+  line.id = 0;
+  line.type = visualization_msgs::Marker::LINE_LIST;
+  line.action = visualization_msgs::Marker::ADD;
+  line.scale.x = 0.05;
+  line.scale.y = 0;
+  line.scale.z = 0;
+  line.color.a = 1.0;
+  line.color.r = 1.0;
+  line.pose.orientation.w = 1.0;
+
+  LineComponent lines[2] = {leftLine, rightLine};
+  for (int i = 0; i < 2; i++)
+  {
+    LineComponent tmp_line = lines[i];
+    if (isnan(tmp_line.w0) || isnan(tmp_line.w1))
+    {
+      ROS_INFO("======= slope 0 !!!!!!!! %f ===========", tmp_line.w0);
+    }
+    else
+    {
+      geometry_msgs::Point p1;
+      p1.x = -5;
+      p1.y = tmp_line.w0 * (-5) + tmp_line.w1;
+      p1.z = 0;
+
+      line.points.push_back(p1);
+      geometry_msgs::Point p2;
+      p2.x = 1;
+      p2.y = tmp_line.w0 + tmp_line.w1;
+      p2.z = 0;
+
+      line.points.push_back(p2);
+      line_pub.publish(line);
+    }
+  }
+}
 
 
 float get_delta(float lw0, float lw1, float rw0, float rw1){
@@ -76,149 +120,61 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   vox.setLeafSize(0.2f, 0.2f, 0.2f); // set Grid Size(0.4m)
   vox.filter(voxelCloud);
 
-  //passthrough===============
-  pcl::PointCloud<pcl::PointXYZ> tmpCloud;
-  pcl::PointCloud<pcl::PointXYZ> passCloudLeft;
-  pcl::PointCloud<pcl::PointXYZ> passCloudRight;
+
+  // ========
+  pcl::PointCloud<pcl::PointXYZ> filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
 
 
-  pcl::PassThrough<pcl::PointXYZ> pass;
-  pass.setInputCloud(voxelCloud.makeShared());
-  pass.setFilterFieldName("x");
-  pass.setFilterLimits(-FORWARD_RANGE, 0);
-  pass.setFilterLimitsNegative(false);
-  pass.filter(tmpCloud);
+  pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, -FORWARD_RANGE)));
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, 0)));
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, -WIDTH)));
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, WIDTH)));
 
-  pass.setInputCloud(tmpCloud.makeShared());
-  pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(WIDTH_Y_START, WIDTH);
-  pass.setFilterLimitsNegative(false);
-  pass.filter(passCloudLeft);
+  // build the filter
+  pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
+  condrem.setCondition(range_cond);
+  condrem.setInputCloud(voxelCloud);
+  condrem.setKeepOrganized(true);
 
-  pass.setInputCloud(tmpCloud.makeShared());
-  pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(-WIDTH, -WIDTH_Y_START);
-  pass.setFilterLimitsNegative(false);
-  pass.filter(passCloudRight);
+  // apply filter
+  condrem.filter(*filteredCloud);
+  // =============================
 
-  // clustering start=====================
-  
-  // left+++++++++++++++++++++++++++++++++++++
   pcl::PointCloud<pcl::PointXYZ> filteredLeft;
-
-  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  kdtree->setInputCloud(passCloudLeft.makeShared());
-  std::vector<pcl::PointIndices> clusterIndices;
-
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_left;
-  ec_left.setClusterTolerance(DISTANCE_THRESHOLD); // set distance threshold = 0.9m
-
-  ec_left.setMinClusterSize(2);   // set Minimum Cluster Size
-  ec_left.setMaxClusterSize(10); // set Maximum Cluster Size
-  ec_left.setSearchMethod(kdtree);
-  ec_left.setInputCloud(passCloudLeft.makeShared());
-  ec_left.extract(clusterIndices);
-
-  std::vector<pcl::PointIndices>::const_iterator it;
-
-  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
-  {
-
-    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      filteredLeft.push_back(passCloudLeft[*pit]);
-  }
-  // left end +++++++++++++++++++++++++++++++++++++
-
-
-  // right start -----------------------
   pcl::PointCloud<pcl::PointXYZ> filteredRight;
-
-  kdtree->setInputCloud(passCloudRight.makeShared());
-
-  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec_right;
-  ec_right.setClusterTolerance(DISTANCE_THRESHOLD); // set distance threshold = 0.9m
-  
-  ec_right.setMinClusterSize(2);   // set Minimum Cluster Size
-  ec_right.setMaxClusterSize(100); // set Maximum Cluster Size
-  ec_right.setSearchMethod(kdtree);
-  ec_right.setInputCloud(passCloudRight.makeShared());
-  ec_right.extract(clusterIndices);
-
-  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
-  {
-    
-    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      filteredRight.push_back(passCloudRight[*pit]);
-  }
-
-  // right end -----------------------
-
 
   // clustering end ======================
   LineComponent leftLine = getLine(filteredLeft);
   LineComponent rightLine = getLine(filteredRight);
 
+  drawLine(leftLine, rightLine);
+
   ROS_INFO("left w0 %f", leftLine.w0);
   ROS_INFO("left w1 %f", leftLine.w1);
   ROS_INFO("right w0 %f", rightLine.w0);
   ROS_INFO("right w1 %f", rightLine.w1);
-
+  
   // control delta value
 
   std_msgs::Float64 delta;
   delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
+  ROS_INFO("====== delta %f =========", delta);
   del_pub.publish(delta);
   
-  ROS_INFO("======delta %f =========", delta);
 
-  // draw line ==========================
-  visualization_msgs::Marker line;
-  line.header.frame_id = "map";
-  line.header.stamp = ros::Time::now();
-  line.ns = "points_and_lines";
-  line.id = 0;
-  line.type = visualization_msgs::Marker::LINE_LIST;
-  line.action = visualization_msgs::Marker::ADD;
-  line.scale.x = 0.05;
-  line.scale.y = 0;
-  line.scale.z = 0;
-  line.color.a = 1.0;
-  line.color.r = 1.0;
-  line.pose.orientation.w = 1.0;
-
-
-  LineComponent lines[2]  = {leftLine, rightLine};
-  for(int i = 0 ; i < 2; i++){
-    LineComponent tmp_line = lines[i];
-    if (isnan(tmp_line.w0) || isnan(tmp_line.w1))
-    {
-      ROS_INFO("======= slope 0 !!!!!!!! %f ===========", tmp_line.w0);
-    } else {
-      geometry_msgs::Point p1;
-      p1.x = -5; p1.y = tmp_line.w0 * (-5) + tmp_line.w1; p1.z = 0;
-
-      line.points.push_back(p1);
-      geometry_msgs::Point p2;
-      p2.x = 1; p2.y = tmp_line.w0 + tmp_line.w1; p2.z = 0;
-
-      line.points.push_back(p2);
-      line_pub.publish(line);
-    }
-  }
-
-
-  //
-  sensor_msgs::PointCloud2 outputLeft;
-  sensor_msgs::PointCloud2 outputRight;
-  
+  sensor_msgs::PointCloud2 outputLeft;  
   pcl::toROSMsg(filteredLeft, outputLeft);
   outputLeft.header.frame_id = "/map";
   left_pub.publish(outputLeft);
   
+  sensor_msgs::PointCloud2 outputRight;
   pcl::toROSMsg(filteredRight, outputRight);
   outputRight.header.frame_id = "/map";
   right_pub.publish(outputRight);
+
 }
+
 
 int main(int argc, char **argv)
 {
