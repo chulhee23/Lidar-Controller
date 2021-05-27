@@ -66,11 +66,11 @@ Diff dmse_line(pcl::PointCloud<pcl::PointXYZ> points, float w[], int cloud_size)
 
 LineComponent getLine(const pcl::PointCloud<pcl::PointXYZ> inputCloud){
   int cloud_size = inputCloud.points.size();
-  float w_init[2] = {0, 0.5};
+  float w_init[2] = {0, 0};
 
-  float alpha = 0.01;
+  float alpha = 0.005;
   float i_max = 1000;
-  float eps = 0.01;
+  float eps = 0.001;
   int index = 0;
   vector<pair<float, float>> w_i = {{0, 0}, {0, 0}, {0, 0}};
 

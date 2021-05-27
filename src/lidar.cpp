@@ -41,8 +41,8 @@ void drawLine(LineComponent leftLine, LineComponent rightLine){
   line.scale.y = 0;
   line.scale.z = 0;
   line.color.a = 1.0;
-  line.color.r = 1.0;
-  line.pose.orientation.w = 1.0;
+  line.color.b = 1.0;
+  line.pose.orientation.w = 0.5;
 
   LineComponent lines[2] = {leftLine, rightLine};
   for (int i = 0; i < 2; i++)
@@ -183,7 +183,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   std::vector<pcl::PointIndices> clusterIndices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
 
-  ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
+  ec.setClusterTolerance(0.35); // set distance threshold = 1.5m
   // size < min_value -> noise -> not cluster
   ec.setMinClusterSize(2);    // set Minimum Cluster Size
   ec.setMaxClusterSize(1000); // set Maximum Cluster Size
