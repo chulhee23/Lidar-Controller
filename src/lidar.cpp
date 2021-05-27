@@ -209,6 +209,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   }
 
   // clustering end ======================
+  ROS_INFO("clustered left size %i", clusteredLeft.size());
   LineComponent leftLine = getLine(clusteredLeft);
   LineComponent rightLine = getLine(kdCloudRight);
 
