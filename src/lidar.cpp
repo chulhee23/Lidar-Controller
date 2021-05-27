@@ -12,15 +12,12 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/segmentation/extract_clusters.h>
 
-
 #include "gradientDescent.cpp"
-
 
 #define FORWARD_RANGE 3
 #define WIDTH 1.5
 #define WIDTH_Y_START -0.25
 #define DISTANCE_THRESHOLD 0.35
-
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
@@ -31,7 +28,8 @@ ros::Publisher del_pub;
 
 float delta = 0.0;
 
-void drawLine(LineComponent leftLine, LineComponent rightLine){
+void drawLine(LineComponent leftLine, LineComponent rightLine)
+{
   visualization_msgs::Marker line;
   line.header.frame_id = "map";
   line.header.stamp = ros::Time::now();
@@ -73,85 +71,112 @@ void drawLine(LineComponent leftLine, LineComponent rightLine){
   }
 }
 
-
-float get_delta(float w0, float b0, float w1, float b1){
-  // don't know which is left or right 
+float get_delta(float w0, float b0, float w1, float b1)
+{
+  // don't know which is left or right
   float lw0, rw0, lw1, rw1;
-  if (b0 > b1){
-    lw0 = w1; lw1 = b1; // left
-    rw0 = w0; rw1 = b0; // right
-  } else {
-    lw0 = w0; lw1 = b0; 
-    rw0 = w1; rw1 = b1; 
+  if (b0 > b1)
+  {
+    lw0 = w1;
+    lw1 = b1; // left
+    rw0 = w0;
+    rw1 = b0; // right
+  }
+  else
+  {
+    lw0 = w0;
+    lw1 = b0;
+    rw0 = w1;
+    rw1 = b1;
   }
 
-  
   // keep center first
-  if (isnan(lw1) && isnan(rw1)){
+  if (isnan(lw1) && isnan(rw1))
+  {
     ROS_INFO("==== WARNING : BOTH LINE NOT DETECTED ========");
     // return prev delta
     return delta;
-  } else if (isnan(rw1) ){
+  }
+  else if (isnan(rw1))
+  {
     ROS_INFO("==== WARNING : RIGHT LINE NOT DETECTED ========");
     if (abs(lw1) > 0.7)
     {
       // 오른쪽으로 치우침
-      if (lw0 > 0){
+      if (lw0 > 0)
+      {
         ROS_INFO("Case 1: Right centered during LEFT TURN");
         delta = 0.5; // 좌회전 중
-      } else {
+      }
+      else
+      {
         ROS_INFO("Case 2: Right centered during RIGHT TURN");
         delta = 0.1; // 우회전 중
       }
       return delta;
-    } 
-    else if (isnan(lw1)) {
-      ROS_INFO("==== WARNING : LEFT LINE NOT DETECTED ========");
-      // return prev delta
-      if (lw0 > 0){
-        ROS_INFO("Case 3: Left centered during LEFT TURN");
-        delta = 0.1; // 좌회전 중
-      }
-      else{
-        ROS_INFO("Case 4: Left centered during RIGHT TURN");
-        delta = 0.5; // 우회전 중
+    }
+  }
+  else if (isnan(lw1))
+  {
+    ROS_INFO("==== WARNING : LEFT LINE NOT DETECTED ========");
+    // return prev delta
+    if (lw0 > 0)
+    {
+      ROS_INFO("Case 3: Left centered during LEFT TURN");
+      delta = 0.1; // 좌회전 중
+    }
+    else
+    {
+      ROS_INFO("Case 4: Left centered during RIGHT TURN");
+      delta = 0.5; // 우회전 중
     }
     return delta;
   }
-  
-  
+
   // both detected
-  if (abs(lw1) > 0.7) {
+  if (abs(lw1) > 0.7)
+  {
     // 오른쪽으로 치우침
-    if (lw0 > 0){
+    if (lw0 > 0)
+    {
       ROS_INFO("Case 1: Right centered during LEFT TURN");
       delta = 0.5; // 좌회전 중
     }
-    else{
+    else
+    {
       ROS_INFO("Case 2: Right centered during RIGHT TURN");
       delta = 0.1; // 우회전 중
     }
   }
-  else if (abs(rw1) > 0.7) {
+  else if (abs(rw1) > 0.7)
+  {
     // 왼쪽으로 치우침
-    if (lw0 > 0){
+    if (lw0 > 0)
+    {
       ROS_INFO("Case 3: Left centered during LEFT TURN");
       delta = 0.1; // 좌회전 중
     }
-    else{
+    else
+    {
       ROS_INFO("Case 4: Left centered during RIGHT TURN");
       delta = 0.5; // 우회전 중
     }
-  } else {
+  }
+  else
+  {
     // 적절한 중앙차선 유지 시,
-    if (((lw0 + rw0) / 2) > 0.3) {
+    if (((lw0 + rw0) / 2) > 0.3)
+    {
       ROS_INFO("Case 5: LEFT TURN");
       delta = 0.2;
     }
-    else if (((lw0 + rw0) / 2) < -0.3){
+    else if (((lw0 + rw0) / 2) < -0.3)
+    {
       ROS_INFO("Case 6: RIGHT TURN");
       delta = -0.2;
-    } else {      
+    }
+    else
+    {
       ROS_INFO("Case STRAIGHT");
       delta = 0;
     }
@@ -159,14 +184,14 @@ float get_delta(float w0, float b0, float w1, float b1){
   return delta;
 }
 
-
-void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
+void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
+{
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud ================
   sensor_msgs::PointCloud msgCloud;
   laser_geometry::LaserProjection projector_;
 
   projector_.projectLaser(*scan, msgCloud);
-  
+
   pcl::PointCloud<pcl::PointXYZ> inputCloud;
   inputCloud.width = msgCloud.points.size();
   inputCloud.height = 1;
@@ -177,21 +202,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     inputCloud.points[i].y = msgCloud.points[i].y;
     inputCloud.points[i].z = 0;
   }
-  
+
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
-  
+
   pcl::PointCloud<pcl::PointXYZ> voxelCloud;
 
   //Voxelization -----------
   pcl::VoxelGrid<pcl::PointXYZ> vox;
 
-  // sensor_msgs 
+  // sensor_msgs
   vox.setInputCloud(inputCloud.makeShared());
   vox.setLeafSize(0.1f, 0.1f, 0.1f); // set Grid Size(0.4m)
   vox.filter(voxelCloud);
-
 
   // ========
   pcl::PointCloud<pcl::PointXYZ> tmpCloud;
@@ -212,12 +236,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pass.filter(passCloud);
   ROS_INFO("Pass Cloud Size %i", passCloud.size());
 
-  sensor_msgs::PointCloud2 filteredOutput;  
+  sensor_msgs::PointCloud2 filteredOutput;
   pcl::toROSMsg(passCloud, filteredOutput);
   filteredOutput.header.frame_id = "/map";
   point_pub.publish(filteredOutput);
   // =============================
-  
+
   // =======
 
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
@@ -245,15 +269,14 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   int cluster_idx = 0;
   for (std::vector<pcl::PointIndices>::const_iterator it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
-  {  
+  {
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       clustered[cluster_idx].push_back(passCloud[*pit]);
-    if (cluster_idx > 1){
+    if (cluster_idx > 1)
+    {
       break;
     }
     cluster_idx++;
-    
-
   }
 
   // clustering end ======================
@@ -268,27 +291,24 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   ROS_INFO("left w1 %f", leftLine.w1);
   ROS_INFO("right w0 %f", rightLine.w0);
   ROS_INFO("right w1 %f", rightLine.w1);
-  
+
   // control delta value
 
   std_msgs::Float64 delta;
   delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
   ROS_INFO("====== DELTA %f =========", delta);
   del_pub.publish(delta);
-  
 
   sensor_msgs::PointCloud2 outputLeft;
   pcl::toROSMsg(clustered[0], outputLeft);
   outputLeft.header.frame_id = "/map";
   left_pub.publish(outputLeft);
-  
+
   sensor_msgs::PointCloud2 outputRight;
   pcl::toROSMsg(clustered[1], outputRight);
   outputRight.header.frame_id = "/map";
   right_pub.publish(outputRight);
-
 }
-
 
 int main(int argc, char **argv)
 {
@@ -302,23 +322,22 @@ int main(int argc, char **argv)
   // the number here specifies how many messages to buffer up before throwing some away.
   ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
-  
+
   point_pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
 
   left_pub = nh.advertise<sensor_msgs::PointCloud2>("/leftLine", 1);
   right_pub = nh.advertise<sensor_msgs::PointCloud2>("/rightLine", 1);
 
-
   line_pub = nh.advertise<visualization_msgs::Marker>("/line", 1);
   // for Arduino publish end ================================
 
   ros::Subscriber lidar_sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1000, scanCallback);
-  
+
   std_msgs::Float64 velocity;
-  velocity.data = 4; 
+  velocity.data = 4;
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
-  
+
   // while(ros::ok()){
   //   ros::spinOnce();
   //   loop_rate.sleep();
