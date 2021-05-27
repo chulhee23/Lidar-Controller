@@ -72,16 +72,58 @@ void drawLine(LineComponent leftLine, LineComponent rightLine){
 }
 
 
-float get_delta(float lw0, float lw1, float rw0, float rw1){
+float get_delta(float w0, float b0, float w1, float b1){
+  // don't know which is left or right 
+  float lw0, rw0, lw1, rw1;
+  if (b0 > b1){
+    lw0 = w1; lw1 = b1; // left
+    rw0 = w0; rw1 = b0; // right
+  } else {
+    lw0 = w0; lw1 = b0; 
+    rw0 = w1; rw1 = b1; 
+  }
+
   float del = 0;
   
-  if(((lw0 + rw0)/2) > 0.28){
-    del = 0.3;
-  } 
-  else if (((lw0 + rw0)/2) < -0.28) {
-    del = -0.3;
+  // keep center first
+  if (isnan(lw1) && isnan(rw1)){
+    ROS_INFO("==== WARNING : LINE NOT DETECTED ========");
+    return del;
   }
-  
+
+  if (abs(lw1) > 0.7){
+    // 오른쪽으로 치우침
+    if (lw0 > 0){
+      // 좌회전 중
+      del = 0.5;
+    } else {
+      // 우회전 중
+      del = 0.1;
+    }
+  } else if (abs(rw1) > 0.7){
+    // 왼쪽으로 치우침
+    if (lw0 > 0){
+      // 좌회전 중
+      del = 0.1;
+    } else {
+      // 우회전 중
+      del = 0.5;
+    }
+  } else {
+    // 적절한 중앙차선 유지 시,
+    if(((lw0 + rw0)/2) > 0.3){
+      del = 0.2;
+    }
+    else if (((lw0 + rw0)/2) < -0.3) {
+      del = -0.2;
+    }
+
+
+  }
+
+
+  // basic algorithm
+
   return del;
 }
 
