@@ -95,21 +95,25 @@ float get_delta(float w0, float b0, float w1, float b1){
 
   if (abs(lw1) > 0.7) {
     // 오른쪽으로 치우침
-    if (lw0 > 0)
+    if (lw0 > 0){
       ROS_INFO("Case 1");
       delta = 0.5; // 좌회전 중
-    else
+    }
+    else{
       ROS_INFO("Case 2");
       delta = 0.1; // 우회전 중
+    }
   }
   else if (abs(rw1) > 0.7) {
     // 왼쪽으로 치우침
-    if (lw0 > 0)
+    if (lw0 > 0){
       ROS_INFO("Case 3");
       delta = 0.1; // 좌회전 중
-    else
+    }
+    else{
       ROS_INFO("Case 4");
       delta = 0.5; // 우회전 중
+    }
   } else {
     // 적절한 중앙차선 유지 시,
     if (((lw0 + rw0) / 2) > 0.3) {
