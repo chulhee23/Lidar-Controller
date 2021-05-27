@@ -113,22 +113,48 @@ float get_delta(float w0, float b0, float w1, float b1)
         ROS_INFO("Case 2: Right centered during RIGHT TURN");
         delta = 0.1; // 우회전 중
       }
-      return delta;
+    } 
+    else 
+    {
+      if(lw0 > 0){
+        ROS_INFO("Case: LEFT TURN");
+        delta = 0.2;
+      } else {
+        ROS_INFO("Case: RIGHT TURN");
+        delta = -0.2;
+      }
     }
+    return delta;
   }
   else if (isnan(lw1))
   {
     ROS_INFO("==== WARNING : LEFT LINE NOT DETECTED ========");
-    // return prev delta
-    if (lw0 > 0)
+    if (abs(rw1) > 0.7)
     {
-      ROS_INFO("Case 3: Left centered during LEFT TURN");
-      delta = 0.1; // 좌회전 중
+      // 왼쪽으로 치우침
+      if (rw0 < 0)
+      {
+        ROS_INFO("Case 1: Left centered during RIGHT TURN");
+        delta = -0.5; // 좌회전 중
+      }
+      else
+      {
+        ROS_INFO("Case 2: Left centered during RIGHT TURN");
+        delta = -0.1; // 우회전 중
+      }
     }
     else
     {
-      ROS_INFO("Case 4: Left centered during RIGHT TURN");
-      delta = 0.5; // 우회전 중
+      if (rw0 > 0)
+      {
+        ROS_INFO("Case: LEFT TURN");
+        delta = 0.2;
+      }
+      else
+      {
+        ROS_INFO("Case: RIGHT TURN");
+        delta = -0.2;
+      }
     }
     return delta;
   }
