@@ -167,22 +167,22 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   
   if (kdtreeLeft.radiusSearch(searchPointLeft, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
     for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
-      kdCloudLeft.points.push_back(passCloud2.points[pointIdxRadiusSearch[i]]);
+      kdCloudLeft.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
 
   if (kdtreeRight.radiusSearch(searchPointRight, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
     for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
-      kdCloudRight.points.push_back(passCloud2.points[pointIdxRadiusSearch[i]]);
+      kdCloudRight.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
 
 
 
   // =======
 
-  pcl::PointCloud<pcl::PointXYZ> filteredLeft;
-  pcl::PointCloud<pcl::PointXYZ> filteredRight;
+  // pcl::PointCloud<pcl::PointXYZ> kdCloudLeft;
+  // pcl::PointCloud<pcl::PointXYZ> kdCloudRight;
 
   // clustering end ======================
-  LineComponent leftLine = getLine(filteredLeft);
-  LineComponent rightLine = getLine(filteredRight);
+  LineComponent leftLine = getLine(kdCloudLeft);
+  LineComponent rightLine = getLine(kdCloudRight);
 
   drawLine(leftLine, rightLine);
 
@@ -200,12 +200,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   
 
   sensor_msgs::PointCloud2 outputLeft;  
-  pcl::toROSMsg(filteredLeft, outputLeft);
+  pcl::toROSMsg(kdCloudLeft, outputLeft);
   outputLeft.header.frame_id = "/map";
   left_pub.publish(outputLeft);
   
   sensor_msgs::PointCloud2 outputRight;
-  pcl::toROSMsg(filteredRight, outputRight);
+  pcl::toROSMsg(kdCloudRight, outputRight);
   outputRight.header.frame_id = "/map";
   right_pub.publish(outputRight);
 
