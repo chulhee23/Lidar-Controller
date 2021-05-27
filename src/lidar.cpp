@@ -159,12 +159,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   // return result
   ec.extract(clusterIndices);
   int clusterN = 1;
+  ROS_INFO("======cluster Index size %i", clusterIndices.size());  
   std::vector<pcl::PointIndices>::const_iterator it;
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {
     pcl::PointCloud<pcl::PointXYZ> clustered;
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       clustered.push_back(passCloud[*pit]);
+    
+    int cloud_size = clustered.points.size();
+    if (clusterN == 1){
+      ROS_INFO("============= n == 1===== %i", cloud_size);
+    } else {
+      ROS_INFO("============= n > 1===== %i", cloud_size);
+    }
 
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(clustered, output);
