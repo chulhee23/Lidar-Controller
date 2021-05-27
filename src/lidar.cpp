@@ -173,7 +173,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   for (std::vector<pcl::PointIndices>::const_iterator it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {  
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      clustered[cluster_idx].push_back(kdCloudLeft[*pit]);
+      clustered[cluster_idx].push_back(passCloud[*pit]);
     if (cluster_idx > 1){
       break;
     }
