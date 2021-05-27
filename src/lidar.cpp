@@ -149,7 +149,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   std::vector<pcl::PointIndices> clusterIndices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
 
-  ec.setClusterTolerance(1.5); // set distance threshold = 1.5m
+  ec.setClusterTolerance(0.5); // set distance threshold = 1.5m
   ec.setMinClusterSize(2);    // set Minimum Cluster Size
   // ec.setMaxClusterSize(25000); // set Maximum Cluster Size
 
@@ -164,7 +164,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   {
     pcl::PointCloud<pcl::PointXYZ> clustered;
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      clustered.push_back(inputCloud[*pit]);
+      clustered.push_back(passCloud[*pit]);
 
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(clustered, output);
