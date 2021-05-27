@@ -158,7 +158,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   // return result
   ec.extract(clusterIndices);
-  
+  int clusterN = 1;
   std::vector<pcl::PointIndices>::const_iterator it;
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {
