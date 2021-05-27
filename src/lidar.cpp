@@ -31,7 +31,6 @@ ros::Publisher line_pub;
 ros::Publisher del_pub;
 
 void drawLine(LineComponent leftLine, LineComponent rightLine){
-
   visualization_msgs::Marker line;
   line.header.frame_id = "map";
   line.header.stamp = ros::Time::now();
@@ -122,23 +121,22 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
 
   // ========
-  pcl::PointCloud<pcl::PointXYZ> filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ> tmpCloud;
+  pcl::PointCloud<pcl::PointXYZ> passCloud;
 
+  pcl::PassThrough<pcl::PointXYZ> pass;
 
-  pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, -FORWARD_RANGE)));
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, 0)));
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, -WIDTH)));
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, WIDTH)));
+  pass.setInputCloud(voxelCloud.makeShared());
+  pass.setFilterFieldName("x"); // axis x
+  pass.setFilterLimits(-2, 0);
+  pass.setFilterLimitsNegative(false);
+  pass.filter(tmpCloud);
 
-  // build the filter
-  pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
-  condrem.setCondition(range_cond);
-  condrem.setInputCloud(voxelCloud);
-  condrem.setKeepOrganized(true);
-
-  // apply filter
-  condrem.filter(*filteredCloud);
+  pass.setInputCloud(tmpCloud.makeShared());
+  pass.setFilterFieldName("y"); // axis y
+  pass.setFilterLimits(-2, 2);
+  pass.setFilterLimitsNegative(false);
+  pass.filter(passCloud);
   // =============================
 
   pcl::PointCloud<pcl::PointXYZ> filteredLeft;
