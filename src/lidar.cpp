@@ -136,6 +136,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   pass.setFilterLimits(-WIDTH, WIDTH);
   pass.setFilterLimitsNegative(false);
   pass.filter(passCloud);
+  ROS_INFO("Pass Cloud Size %i", passCloud.size());
 
   sensor_msgs::PointCloud2 filteredOutput;  
   pcl::toROSMsg(passCloud, filteredOutput);
@@ -172,17 +173,46 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   if (kdtreeRight.radiusSearch(searchPointRight, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
     for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
       kdCloudRight.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
-
-
-
+  ROS_INFO("Kd Left Cloud Size %i", kdCloudLeft.size());
+  ROS_INFO("Kd Right Cloud Size %i", ldCloudRight.size());
   // =======
 
-  // pcl::PointCloud<pcl::PointXYZ> kdCloudLeft;
-  // pcl::PointCloud<pcl::PointXYZ> kdCloudRight;
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+  kdtree->setInputCloud(kdCloudLeft.makeShared());
+
+  std::vector<pcl::PointIndices> clusterIndices;
+  pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+
+  ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
+  // size < min_value -> noise -> not cluster
+  ec.setMinClusterSize(2);    // set Minimum Cluster Size
+  ec.setMaxClusterSize(1000); // set Maximum Cluster Size
+
+  ec.setSearchMethod(kdtree);
+  ec.setInputCloud(kdCloudLeft.makeShared());
+
+  ec.extract(clusterIndices);
+  std::vector<pcl::PointIndices>::const_iterator it;
+  pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
+
+  ROS_INFO("left clusterIndices %i", clusterIndices.size());
+  int clusterN = 1;
+  for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
+  {  
+    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+      clusteredLeft.push_back(inputCloud[*pit]);
+
+    if (clusterN > 1)
+      break;
+    
+    clusterN++;
+  }
 
   // clustering end ======================
-  LineComponent leftLine = getLine(kdCloudLeft);
+  LineComponent leftLine = getLine(clusteredLeft);
   LineComponent rightLine = getLine(kdCloudRight);
+
+
 
   drawLine(leftLine, rightLine);
 
@@ -199,8 +229,8 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   del_pub.publish(delta);
   
 
-  sensor_msgs::PointCloud2 outputLeft;  
-  pcl::toROSMsg(kdCloudLeft, outputLeft);
+  sensor_msgs::PointCloud2 outputLeft;
+  pcl::toROSMsg(clusteredLeft, outputLeft);
   outputLeft.header.frame_id = "/map";
   left_pub.publish(outputLeft);
   
