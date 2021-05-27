@@ -153,7 +153,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   kdtreeRight.setInputCloud(passCloud.makeShared());
 
   pcl::PointXYZ searchPointLeft; // set Search Left Point : (0, -2, 0)
-  searchPointLeft.x = 0;
+  searchPointLeft.x = -1;
   searchPointLeft.y = -1;
   searchPointLeft.z = 0;
 
@@ -200,7 +200,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   for (it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {  
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      clusteredLeft.push_back(inputCloud[*pit]);
+      clusteredLeft.push_back(kdCloudLeft[*pit]);
 
     if (clusterN > 1)
       break;
