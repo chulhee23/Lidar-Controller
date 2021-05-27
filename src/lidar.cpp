@@ -143,76 +143,50 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   filteredOutput.header.frame_id = "/map";
   point_pub.publish(filteredOutput);
   // =============================
-  pcl::PointCloud<pcl::PointXYZ> kdCloudLeft;
-  pcl::PointCloud<pcl::PointXYZ> kdCloudRight;
-
-  pcl::KdTreeFLANN<pcl::PointXYZ> kdtreeLeft;
-  pcl::KdTreeFLANN<pcl::PointXYZ> kdtreeRight;
-
-  kdtreeLeft.setInputCloud(passCloud.makeShared());
-  kdtreeRight.setInputCloud(passCloud.makeShared());
-
-  pcl::PointXYZ searchPointLeft; // set Search Left Point : (0, -2, 0)
-  searchPointLeft.x = 0;
-  searchPointLeft.y = -1;
-  searchPointLeft.z = 0;
-
-  pcl::PointXYZ searchPointRight; // set Search Right Point : (0, 2, 0)
-  searchPointRight.x = 0;
-  searchPointRight.y = 1;
-  searchPointRight.z = 0;
-  std::vector<int> pointIdxRadiusSearch;         //index
-  std::vector<float> pointRadiusSquaredDistance; //distance
-
-  float radius = 1.2; // set searching radius size = 2.2m
   
-  if (kdtreeLeft.radiusSearch(searchPointLeft, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
-    for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
-      kdCloudLeft.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
-
-  if (kdtreeRight.radiusSearch(searchPointRight, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
-    for (int i = 0; i < pointIdxRadiusSearch.size(); ++i)
-      kdCloudRight.points.push_back(passCloud.points[pointIdxRadiusSearch[i]]);
-  ROS_INFO("Kd Left Cloud Size %i", kdCloudLeft.size());
-  ROS_INFO("Kd Right Cloud Size %i", kdCloudRight.size());
   // =======
 
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
-  kdtree->setInputCloud(kdCloudLeft.makeShared());
+  kdtree->setInputCloud(passCloud.makeShared());
 
   std::vector<pcl::PointIndices> clusterIndices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
 
   ec.setClusterTolerance(0.7); // set distance threshold = 1.5m
   // size < min_value -> noise -> not cluster
-  ec.setMinClusterSize(6);    // set Minimum Cluster Size
+  ec.setMinClusterSize(8);    // set Minimum Cluster Size
   ec.setMaxClusterSize(1000); // set Maximum Cluster Size
 
   ec.setSearchMethod(kdtree);
-  ec.setInputCloud(kdCloudLeft.makeShared());
+  ec.setInputCloud(passCloud.makeShared());
 
   ec.extract(clusterIndices);
 
-  pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
+  // pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
+  // pcl::PointCloud<pcl::PointXYZ> clusteredRight;
 
-  ROS_INFO("left clusterIndices %i", clusterIndices.size());
+  pcl::PointCloud<pcl::PointXYZ> clustered[2];
 
-  // int clusterN = 1;
+  ROS_INFO("cluster number %i", clusterIndices.size());
+
+  int cluster_idx = 0;
   for (std::vector<pcl::PointIndices>::const_iterator it = clusterIndices.begin(); it != clusterIndices.end(); ++it)
   {  
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-      clusteredLeft.push_back(kdCloudLeft[*pit]);
+      clustered[cluster_idx].push_back(kdCloudLeft[*pit]);
+    if (cluster_idx > 1){
+      break;
+    }
+    cluster_idx++;
     
-    break;
 
   }
 
   // clustering end ======================
-  ROS_INFO("clustered left size %i", clusteredLeft.size());
-  LineComponent leftLine = getLine(clusteredLeft);
-  LineComponent rightLine = getLine(kdCloudRight);
-
-
+  ROS_INFO("clustered 1st size %i", clustered[0].size());
+  ROS_INFO("clustered 2nd size %i", clustered[1].size());
+  LineComponent leftLine = getLine(clustered[0]);
+  LineComponent rightLine = getLine(clustered[1]);
 
   drawLine(leftLine, rightLine);
 
@@ -230,12 +204,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
   
 
   sensor_msgs::PointCloud2 outputLeft;
-  pcl::toROSMsg(clusteredLeft, outputLeft);
+  pcl::toROSMsg(clustered[0], outputLeft);
   outputLeft.header.frame_id = "/map";
   left_pub.publish(outputLeft);
   
   sensor_msgs::PointCloud2 outputRight;
-  pcl::toROSMsg(kdCloudRight, outputRight);
+  pcl::toROSMsg(clustered[1], outputRight);
   outputRight.header.frame_id = "/map";
   right_pub.publish(outputRight);
 
