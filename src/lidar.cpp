@@ -29,6 +29,8 @@ ros::Publisher right_pub;
 ros::Publisher line_pub;
 ros::Publisher del_pub;
 
+float delta = 0.0;
+
 void drawLine(LineComponent leftLine, LineComponent rightLine){
   visualization_msgs::Marker line;
   line.header.frame_id = "map";
@@ -50,7 +52,7 @@ void drawLine(LineComponent leftLine, LineComponent rightLine){
     LineComponent tmp_line = lines[i];
     if (isnan(tmp_line.w0) || isnan(tmp_line.w1))
     {
-      ROS_INFO("======= slope 0 !!!!!!!! %f ===========", tmp_line.w0);
+      ROS_INFO(" LEAST 1 LINE MISSED ....");
     }
     else
     {
@@ -83,48 +85,37 @@ float get_delta(float w0, float b0, float w1, float b1){
     rw0 = w1; rw1 = b1; 
   }
 
-  float del = 0;
   
   // keep center first
-  if (isnan(lw1) && isnan(rw1)){
+  if (isnan(lw0) && isnan(rw0) ){
     ROS_INFO("==== WARNING : LINE NOT DETECTED ========");
-    return del;
+    // return prev delta
+    return delta;
   }
 
-  if (abs(lw1) > 0.7){
+  if (abs(lw1) > 0.7) {
     // 오른쪽으로 치우침
-    if (lw0 > 0){
-      // 좌회전 중
-      del = 0.5;
-    } else {
-      // 우회전 중
-      del = 0.1;
-    }
-  } else if (abs(rw1) > 0.7){
+    if (lw0 > 0)
+      delta = 0.5; // 좌회전 중
+    else
+      delta = 0.1; // 우회전 중
+  }
+  else if (abs(rw1) > 0.7) {
     // 왼쪽으로 치우침
-    if (lw0 > 0){
-      // 좌회전 중
-      del = 0.1;
-    } else {
-      // 우회전 중
-      del = 0.5;
-    }
+    if (lw0 > 0)
+      delta = 0.1; // 좌회전 중
+    else
+      delta = 0.5; // 우회전 중
   } else {
     // 적절한 중앙차선 유지 시,
-    if(((lw0 + rw0)/2) > 0.3){
-      del = 0.2;
+    if (((lw0 + rw0) / 2) > 0.3) {
+      delta = 0.2;
     }
-    else if (((lw0 + rw0)/2) < -0.3) {
-      del = -0.2;
+    else if (((lw0 + rw0) / 2) < -0.3){
+      delta = -0.2;
     }
-
-
   }
-
-
-  // basic algorithm
-
-  return del;
+  return delta;
 }
 
 
@@ -241,7 +232,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   std_msgs::Float64 delta;
   delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
-  ROS_INFO("====== delta %f =========", delta);
+  ROS_INFO("====== DELTA %f =========", delta);
   del_pub.publish(delta);
   
 
