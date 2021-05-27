@@ -45,5 +45,5 @@ include_directories(
 add_executable(lidar src/lidar.cpp)
 target_link_libraries(lidar  ${catkin_LIBRARIES})
 
-add_executable(filter src/filter.cpp)
-target_link_libraries(filter  ${catkin_LIBRARIES})
+# add_executable(filter src/filter.cpp)
+# target_link_libraries(filter  ${catkin_LIBRARIES})

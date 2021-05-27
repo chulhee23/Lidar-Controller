@@ -10,7 +10,6 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/filters/conditional_removal.h>
 #include <pcl/segmentation/extract_clusters.h>
 
 
@@ -104,7 +103,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
     inputCloud.points[i].y = msgCloud.points[i].y;
     inputCloud.points[i].z = 0;
   }
-  // pcl::fromROSMsg(msgCloud, inputCloud);
+  
   // sensor_msgs::LaserScan -> sensor_msgs::PointCloud end =============
 
   // filter ROI start ++++++++++++++++++++++++++
@@ -128,15 +127,20 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan) {
 
   pass.setInputCloud(voxelCloud.makeShared());
   pass.setFilterFieldName("x"); // axis x
-  pass.setFilterLimits(-2, 0);
+  pass.setFilterLimits(-FORWARD_RANGE, 0);
   pass.setFilterLimitsNegative(false);
   pass.filter(tmpCloud);
 
   pass.setInputCloud(tmpCloud.makeShared());
   pass.setFilterFieldName("y"); // axis y
-  pass.setFilterLimits(-2, 2);
+  pass.setFilterLimits(-WIDTH, WIDTH);
   pass.setFilterLimitsNegative(false);
   pass.filter(passCloud);
+
+  sensor_msgs::PointCloud2 filteredOutput;  
+  pcl::toROSMsg(passCloud, filteredOutput);
+  filteredOutput.header.frame_id = "/map";
+  point_pub.publish(filteredOutput);
   // =============================
 
   pcl::PointCloud<pcl::PointXYZ> filteredLeft;
