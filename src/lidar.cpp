@@ -367,10 +367,10 @@ int main(int argc, char **argv)
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
 
-  // while(ros::ok()){
-  //   ros::spinOnce();
-  //   loop_rate.sleep();
-  // }
-  ros::spin();
+  while(ros::ok()){
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  // ros::spin();
   return 0;
 }
