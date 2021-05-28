@@ -111,7 +111,7 @@ float get_delta(float w0, float b0, float w1, float b1)
     delta = 0;
     return delta;
   }
-  else if (isnan(rw1))
+  else if (notDetected(rw1))
   {
     ROS_INFO("==== WARNING : RIGHT LINE NOT DETECTED ========");
     if (abs(lw1) > Y_AXIS_THRESHOLD)
