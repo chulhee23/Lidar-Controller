@@ -335,9 +335,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // control delta value
 
   std_msgs::Float64 delta;
-  delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1);
+  delta.data = get_delta(leftLine.w0, leftLine.w1, rightLine.w0, rightLine.w1) - 0.1;
   ROS_INFO("====== DELTA %f =========", delta);
-  del_pub.publish(delta - 0.1);
+  del_pub.publish(delta);
 
   sensor_msgs::PointCloud2 outputLeft;
   pcl::toROSMsg(clustered[0], outputLeft);
