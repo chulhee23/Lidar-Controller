@@ -21,8 +21,8 @@
 #define DISTANCE_THRESHOLD 0.35
 
 #define MIN_TURN 0.1
-#define TURN 0.5
-#define MAX_TURN 0.5
+#define TURN 0.2
+#define MAX_TURN 0.3
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
@@ -343,7 +343,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
 
   // ==========
   std_msgs::Float64 velocity;
-  velocity.data = 3;
+  velocity.data = 2.5;
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
 }
