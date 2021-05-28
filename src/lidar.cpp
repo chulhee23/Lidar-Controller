@@ -20,9 +20,9 @@
 #define Y_AXIS_THRESHOLD 0.65
 #define DISTANCE_THRESHOLD 0.35
 
-#define MIN_TURN 0.1
-#define TURN 0.2
-#define MAX_TURN 0.3
+#define MIN_TURN 0.03
+#define TURN 0.1
+#define MAX_TURN 0.2
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
