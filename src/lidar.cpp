@@ -14,7 +14,7 @@
 
 #include "gradientDescent.cpp"
 
-#define FORWARD_RANGE 3
+#define FORWARD_RANGE 3.5
 #define WIDTH 1.5
 #define WIDTH_Y_START -TURN5
 #define Y_AXIS_THRESHOLD 0.65
