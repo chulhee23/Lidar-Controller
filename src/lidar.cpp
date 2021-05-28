@@ -60,17 +60,17 @@ void drawLine(LineComponent leftLine, LineComponent rightLine)
     else
     {
       geometry_msgs::Point p1;
-      p1.x = -5;
-      p1.y = tmp_line.w0 * (-5) + tmp_line.w1;
+      p1.x = -1;
+      p1.y = tmp_line.w0 * p1.x + tmp_line.w1;
       p1.z = 0;
-
       line.points.push_back(p1);
+      
       geometry_msgs::Point p2;
-      p2.x = 1;
-      p2.y = tmp_line.w0 + tmp_line.w1;
+      p2.x = 5;
+      p2.y = tmp_line.w0 * p2.x + tmp_line.w1;
       p2.z = 0;
-
       line.points.push_back(p2);
+      
       line_pub.publish(line);
     }
   }
