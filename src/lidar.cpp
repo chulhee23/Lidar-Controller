@@ -363,14 +363,14 @@ int main(int argc, char **argv)
   ros::Subscriber lidar_sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1000, scanCallback);
 
   std_msgs::Float64 velocity;
-  velocity.data = 4;
+  velocity.data = 3;
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
 
-  while(ros::ok()){
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-  // ros::spin();
+  // while(ros::ok()){
+  //   ros::spinOnce();
+  //   loop_rate.sleep();
+  // }
+  ros::spin();
   return 0;
 }
