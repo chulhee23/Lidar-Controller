@@ -20,7 +20,9 @@
 #define Y_AXIS_THRESHOLD 0.65
 #define DISTANCE_THRESHOLD 0.35
 
-#define TURN 0.3
+#define MIN_TURN 0.1
+#define TURN 0.5
+#define MAX_TURN 0.5
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
@@ -109,7 +111,7 @@ float get_delta(float w0, float b0, float w1, float b1)
       if (lw0 > 0)
       {
         ROS_INFO("Case 1: Right centered during LEFT TURN");
-        delta = 0.5; // 좌회전 중
+        delta = MAX_TURN; // 좌회전 중
       }
       else
       {
@@ -138,7 +140,7 @@ float get_delta(float w0, float b0, float w1, float b1)
       if (rw0 < 0)
       {
         ROS_INFO("Case 1: Left centered during RIGHT TURN");
-        delta = -0.5; // 좌회전 중
+        delta = -MAX_TURN; // 좌회전 중
       }
       else
       {
@@ -169,7 +171,7 @@ float get_delta(float w0, float b0, float w1, float b1)
     if (lw0 > 0)
     {
       ROS_INFO("Case 1: Right centered during LEFT TURN");
-      delta = 0.5; // 좌회전 중
+      delta = MAX_TURN; // 좌회전 중
     }
     else
     {
@@ -188,7 +190,7 @@ float get_delta(float w0, float b0, float w1, float b1)
     else
     {
       ROS_INFO("Case 4: Left centered during RIGHT TURN");
-      delta = 0.5; // 우회전 중
+      delta = MAX_TURN; // 우회전 중
     }
   }
   else
