@@ -16,8 +16,11 @@
 
 #define FORWARD_RANGE 3
 #define WIDTH 1.5
-#define WIDTH_Y_START -0.25
+#define WIDTH_Y_START -TURN5
+#define Y_AXIS_THRESHOLD 0.65
 #define DISTANCE_THRESHOLD 0.35
+
+#define TURN 0.3
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;
@@ -100,7 +103,7 @@ float get_delta(float w0, float b0, float w1, float b1)
   else if (isnan(rw1))
   {
     ROS_INFO("==== WARNING : RIGHT LINE NOT DETECTED ========");
-    if (abs(lw1) > 0.7)
+    if (abs(lw1) > Y_AXIS_THRESHOLD)
     {
       // 오른쪽으로 치우침
       if (lw0 > 0)
@@ -118,10 +121,10 @@ float get_delta(float w0, float b0, float w1, float b1)
     {
       if(lw0 > 0){
         ROS_INFO("Case: LEFT TURN");
-        delta = 0.2;
+        delta = TURN;
       } else {
         ROS_INFO("Case: RIGHT TURN");
-        delta = -0.2;
+        delta = -TURN;
       }
     }
     return delta;
@@ -129,7 +132,7 @@ float get_delta(float w0, float b0, float w1, float b1)
   else if (isnan(lw1))
   {
     ROS_INFO("==== WARNING : LEFT LINE NOT DETECTED ========");
-    if (abs(rw1) > 0.7)
+    if (abs(rw1) > Y_AXIS_THRESHOLD)
     {
       // 왼쪽으로 치우침
       if (rw0 < 0)
@@ -148,19 +151,19 @@ float get_delta(float w0, float b0, float w1, float b1)
       if (rw0 > 0)
       {
         ROS_INFO("Case: LEFT TURN");
-        delta = 0.2;
+        delta = TURN;
       }
       else
       {
         ROS_INFO("Case: RIGHT TURN");
-        delta = -0.2;
+        delta = -TURN;
       }
     }
     return delta;
   }
 
   // both detected
-  if (abs(lw1) > 0.7)
+  if (abs(lw1) > Y_AXIS_THRESHOLD)
   {
     // 오른쪽으로 치우침
     if (lw0 > 0)
@@ -174,7 +177,7 @@ float get_delta(float w0, float b0, float w1, float b1)
       delta = 0.1; // 우회전 중
     }
   }
-  else if (abs(rw1) > 0.7)
+  else if (abs(rw1) > Y_AXIS_THRESHOLD)
   {
     // 왼쪽으로 치우침
     if (lw0 > 0)
@@ -194,12 +197,12 @@ float get_delta(float w0, float b0, float w1, float b1)
     if (((lw0 + rw0) / 2) > 0.3)
     {
       ROS_INFO("Case 5: LEFT TURN");
-      delta = 0.2;
+      delta = TURN;
     }
     else if (((lw0 + rw0) / 2) < -0.3)
     {
       ROS_INFO("Case 6: RIGHT TURN");
-      delta = -0.2;
+      delta = -TURN;
     }
     else
     {
