@@ -28,7 +28,7 @@ ros::Publisher right_pub;
 
 ros::Publisher line_pub;
 ros::Publisher del_pub;
-
+ros::Publisher vel_pub;
 float delta = 0.0;
 
 void drawLine(LineComponent leftLine, LineComponent rightLine)
@@ -337,6 +337,13 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   pcl::toROSMsg(clustered[1], outputRight);
   outputRight.header.frame_id = "/map";
   right_pub.publish(outputRight);
+
+
+  // ==========
+  std_msgs::Float64 velocity;
+  velocity.data = 3;
+  vel_pub.publish(velocity);
+  ROS_INFO("VELOCITY %f", velocity.data);
 }
 
 int main(int argc, char **argv)
@@ -349,7 +356,7 @@ int main(int argc, char **argv)
   // The second parameter to advertise() is the size of the message queue used for publishing messages.
   // If messages are published more quickly than we can send them,
   // the number here specifies how many messages to buffer up before throwing some away.
-  ros::Publisher vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
+  vel_pub = nh.advertise<std_msgs::Float64>("/vel", 1000);
   del_pub = nh.advertise<std_msgs::Float64>("/del", 1000);
 
   point_pub = nh.advertise<sensor_msgs::PointCloud2>("/rvizTest", 1);
