@@ -21,8 +21,8 @@
 #define DISTANCE_THRESHOLD 0.35
 
 #define MIN_TURN 0.03
-#define TURN 0.1
-#define MAX_TURN 0.2
+#define TURN 0.15
+#define MAX_TURN 0.25
 
 ros::Publisher point_pub;
 ros::Publisher left_pub;

@@ -50,8 +50,15 @@ Diff dmse_line(pcl::PointCloud<pcl::PointXYZ> points, float w[], int cloud_size)
     d_w1_vec.push_back(d);
   }
 
-  float mean_0 = accumulate(d_w0_vec.begin(), d_w0_vec.end(), 0.0) / d_w0_vec.size();
-  float mean_1 = accumulate(d_w1_vec.begin(), d_w1_vec.end(), 0.0) / d_w1_vec.size();
+  float mean_0 = 0;
+  float mean_1 = 0;
+  if (d_w0_vec.size() > 0){
+    mean_0 = accumulate(d_w0_vec.begin(), d_w0_vec.end(), 0.0) / d_w0_vec.size();
+
+  }
+  if (d_w1_vec.size() > 0){
+    mean_1 = accumulate(d_w1_vec.begin(), d_w1_vec.end(), 0.0) / d_w1_vec.size();
+  }
 
   float d_w0 = 2 * mean_0;
   float d_w1 = 2 * mean_1;
