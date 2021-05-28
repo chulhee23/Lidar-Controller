@@ -257,7 +257,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
 
   pass.setInputCloud(voxelCloud.makeShared());
   pass.setFilterFieldName("x"); // axis x
-  pass.setFilterLimits(-FORWARD_RANGE, 0);
+  pass.setFilterLimits(0, FORWARD_RANGE);
   pass.setFilterLimitsNegative(false);
   pass.filter(tmpCloud);
 
