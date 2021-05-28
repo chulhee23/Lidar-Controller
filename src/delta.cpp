@@ -18,6 +18,35 @@ float notDetected(float v){
   }
 }
 
+float getDelta(float w0, float b0, float w1, float b1){
+  // don't know which is left or right
+  float lw0, rw0, lw1, rw1;
+
+  if(!notDetected(b0) && !notDetected(b1)){
+
+    if (b0 > b1)
+    {
+      lw0 = w0;
+      lw1 = b0;
+      rw0 = w1;
+      rw1 = b1;
+    }
+    else
+    {
+      lw0 = w1;
+      lw1 = b1; 
+      rw0 = w0;
+      rw1 = b0;
+    }
+
+  }
+
+
+  
+
+  return delta;  
+
+}
 
 float get_delta(float w0, float b0, float w1, float b1)
 {

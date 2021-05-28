@@ -48,7 +48,7 @@ void drawLine(LineComponent leftLine, LineComponent rightLine)
   for (int i = 0; i < 2; i++)
   {
     LineComponent tmp_line = lines[i];
-    if (isnan(tmp_line.w0) || isnan(tmp_line.w1))
+    if (notDetected(tmp_line.w0) || notDetected(tmp_line.w1))
     {
       ROS_INFO("AT LEAST 1 LINE MISSED ....");
     }
@@ -160,11 +160,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   {
     for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
       clustered[cluster_idx].push_back(passCloud[*pit]);
+    
+    cluster_idx++;
     if (cluster_idx > 1)
     {
       break;
     }
-    cluster_idx++;
   }
 
   // clustering end ======================
