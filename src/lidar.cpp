@@ -82,24 +82,25 @@ float get_delta(float w0, float b0, float w1, float b1)
   float lw0, rw0, lw1, rw1;
   if (b0 > b1)
   {
-    lw0 = w1;
-    lw1 = b1; // left
-    rw0 = w0;
-    rw1 = b0; // right
-  }
-  else
-  {
     lw0 = w0;
     lw1 = b0;
     rw0 = w1;
     rw1 = b1;
   }
+  else
+  {
+    lw0 = w1;
+    lw1 = b1; // left
+    rw0 = w0;
+    rw1 = b0; // right
+  }
 
   // keep center first
   if (isnan(lw1) && isnan(rw1))
   {
-    ROS_INFO("==== WARNING : BOTH LINE NOT DETECTED ========");
+    ROS_INFO("==== ERROR!!! : BOTH LINE NOT DETECTED ========");
     // return prev delta
+    delta = 0;
     return delta;
   }
   else if (isnan(rw1))
@@ -116,7 +117,7 @@ float get_delta(float w0, float b0, float w1, float b1)
       else
       {
         ROS_INFO("Case 2: Right centered during RIGHT TURN");
-        delta = 0.1; // 우회전 중
+        delta = MIN_TURN; // 우회전 중
       }
     } 
     else 
@@ -145,7 +146,7 @@ float get_delta(float w0, float b0, float w1, float b1)
       else
       {
         ROS_INFO("Case 2: Left centered during RIGHT TURN");
-        delta = -0.1; // 우회전 중
+        delta = -MIN_TURN; // 우회전 중
       }
     }
     else
@@ -176,7 +177,7 @@ float get_delta(float w0, float b0, float w1, float b1)
     else
     {
       ROS_INFO("Case 2: Right centered during RIGHT TURN");
-      delta = 0.1; // 우회전 중
+      delta = MIN_TURN; // 우회전 중
     }
   }
   else if (abs(rw1) > Y_AXIS_THRESHOLD)
@@ -185,7 +186,7 @@ float get_delta(float w0, float b0, float w1, float b1)
     if (lw0 > 0)
     {
       ROS_INFO("Case 3: Left centered during LEFT TURN");
-      delta = 0.1; // 좌회전 중
+      delta = MIN_TURN; // 좌회전 중
     }
     else
     {
