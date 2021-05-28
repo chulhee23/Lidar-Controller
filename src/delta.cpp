@@ -83,7 +83,10 @@ float getDelta(float w0, float b0, float w1, float b1){
 
     } else {
       ROS_INFO("==== CENTERED ");
-      if (abs(mean_slope) < 1){
+
+      if (abs(mean_slope) < 0.3){
+        delta = 0;
+      } else if (abs(mean_slope) >= 0.3 && abs(mean_slope) < 1){
         delta = (mean_slope > 0 ? TURN : -TURN);
       } else if (abs(mean_slope) >= 1){
         delta = (mean_slope > 0 ? MAX_TURN : -MAX_TURN);
