@@ -9,7 +9,7 @@
 #define TURN_THRESHOLD 1
 
 #define MIN_TURN 0.2
-#define TURN 0.2
+#define TURN 0.25
 #define MAX_TURN 0.4
 
 float delta = 0.0;
