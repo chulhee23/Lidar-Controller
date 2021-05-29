@@ -171,6 +171,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // clustering end ======================
   ROS_INFO("clustered 1st size %i", clustered[0].size());
   ROS_INFO("clustered 2nd size %i", clustered[1].size());
+  if(clustered[0].size() > 0){
+   ROS_INFO("clustered first x %f", clustered[0].points[clustered[0].size() - 1].x);
+   ROS_INFO("clustered first y %f", clustered[0].points[clustered[0].size() - 1].y);
+  }
   LineComponent leftLine = getLine(clustered[0]);
   LineComponent rightLine = getLine(clustered[1]);
 

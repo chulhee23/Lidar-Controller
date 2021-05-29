@@ -117,8 +117,15 @@ LineComponent getLine(const pcl::PointCloud<pcl::PointXYZ> inputCloud){
 
   float w0 = w_i[index].first;
   float w1 = w_i[index].second;
-
-
+  if(inputCloud.size() > 0){
+    int idx = 0;
+    if(inputCloud.points[0].x > inputCloud.points[inputCloud.size() - 1].x)
+    {
+      idx = inputCloud.size() - 1;
+    } 
+    w1 = inputCloud.points[idx].y;
+  }
+  
   LineComponent line;
   line.w0 = w0;
   line.w1 = w1;

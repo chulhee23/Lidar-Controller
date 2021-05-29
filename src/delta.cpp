@@ -64,7 +64,7 @@ float oneLineFollow(float w, float b){
 float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float w1, float b1, pcl::PointCloud<pcl::PointXYZ> cloud1)
 {
   // don't know which is left or right
-  if (notDetected(b0) && notDetected(b1)){
+  if (notDetected(w0) && notDetected(w1)){
     ROS_INFO("=========== BOTH LINE NOT DETECTED ==============");
     return delta;
   }
@@ -72,7 +72,7 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
   int right_cloud_size;
 
   float lw0, rw0, lw1, rw1;
-  if(!notDetected(b0) && !notDetected(b1)){
+  if(!notDetected(w0) && !notDetected(w1)){
     if (b0 > b1)
     {
       lw0 = w0;
@@ -148,7 +148,7 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
     }
   } else {
     // 1 line detected
-    if (!notDetected(b0)){
+    if (!notDetected(w0)){
       delta = oneLineFollow(w0, b0);
     } else {
       delta = oneLineFollow(w1, b1);
