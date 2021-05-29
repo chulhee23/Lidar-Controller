@@ -2,9 +2,9 @@
 #include <std_msgs/Float64.h>
 
 
-#define MIN_TURN 0.1
-#define TURN 0.2
-#define MAX_TURN 0.3
+#define MIN_TURN 0.2
+#define TURN 0.3
+#define MAX_TURN 0.4
 #define Y_AXIS_THRESHOLD 0.65
 
 float delta = 0.0;
