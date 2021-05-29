@@ -202,9 +202,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // ==========
   std_msgs::Float64 velocity;
   if (abs(delta.data) < 0.3) {
-    velocity.data = 4;
+    velocity.data = 5;
   } else {
-    velocity.data = 3.5;
+    velocity.data = 4;
   }
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
   ros::Subscriber lidar_sub = nh.subscribe<sensor_msgs::LaserScan>("/scan", 1000, scanCallback);
 
   std_msgs::Float64 velocity;
-  velocity.data = 3;
+  velocity.data = 0;
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
 
