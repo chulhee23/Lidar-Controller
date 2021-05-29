@@ -2,7 +2,7 @@
 #include <std_msgs/Float64.h>
 
 
-#define CENTERED_THRESHOLD 0.3
+#define CENTERED_THRESHOLD 0.2
 
 #define STRAIGHT_THRESHOLD 0.2
 #define MIN_TURN_THRESHOLD 0.4
@@ -27,7 +27,7 @@ float oneLineFollow(float w, float b){
   float del = w;
   if(abs(b) < CENTERED_THRESHOLD){
     ROS_INFO("MIN TURN in ONE LINE");
-    del = (w > 0 ? MIN_TURN : -MIN_TURN);
+    del = (w > 0 ? TURN : -TURN);
   } else {
     ROS_INFO("TURN in ONE LINE");
     del = (w > 0 ? TURN : -TURN);
@@ -74,7 +74,7 @@ float getDelta(float w0, float b0, float w1, float b1){
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Left centered LEFT TURN");
-          delta = 0;
+          delta = MIN_TURN;
         }
       }
       else
@@ -82,7 +82,7 @@ float getDelta(float w0, float b0, float w1, float b1){
         ROS_INFO("RIGHT CENTERED! %f", lw1);
         if(mean_slope < 0 ){
           ROS_INFO("Right centered RIGHT TURN");
-          delta = 0;
+          delta = MIN_TURN;
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Right centered LEFT TURN");
