@@ -5,12 +5,12 @@
 #define CENTERED_THRESHOLD 0.3
 
 #define STRAIGHT_THRESHOLD 0.2
-#define MIN_TURN_THRESHOLD 0.4
-#define TURN_THRESHOLD 1
+#define MIN_TURN_THRESHOLD 0.35
+#define TURN_THRESHOLD 0.7
 
 #define MIN_TURN 0.2
-#define TURN 0.3
-#define MAX_TURN 0.4
+#define TURN 0.35
+#define MAX_TURN 0.5
 
 float delta = 0.0;
 
