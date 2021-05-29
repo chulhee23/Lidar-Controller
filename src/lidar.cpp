@@ -15,7 +15,7 @@
 #include "gradientDescent.cpp"
 #include "delta.cpp"
 
-#define FORWARD_RANGE 3.5
+#define FORWARD_RANGE 3
 #define WIDTH 1.5
 
 
