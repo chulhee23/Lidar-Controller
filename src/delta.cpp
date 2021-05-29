@@ -8,7 +8,7 @@
 #define MIN_TURN_THRESHOLD 0.4
 #define TURN_THRESHOLD 1
 
-#define MIN_TURN 0.15
+#define MIN_TURN 0.2
 #define TURN 0.3
 #define MAX_TURN 0.5
 
