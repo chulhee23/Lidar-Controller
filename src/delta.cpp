@@ -74,7 +74,7 @@ float getDelta(float w0, float b0, float w1, float b1){
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Left centered LEFT TURN");
-          delta = MIN_TURN;
+          delta = 0;
         }
       }
       else
@@ -82,7 +82,7 @@ float getDelta(float w0, float b0, float w1, float b1){
         ROS_INFO("RIGHT CENTERED! %f", lw1);
         if(mean_slope < 0 ){
           ROS_INFO("Right centered RIGHT TURN");
-          delta = -MIN_TURN;
+          delta = 0;
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Right centered LEFT TURN");
