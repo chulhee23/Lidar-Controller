@@ -28,7 +28,8 @@ float oneLineFollow(float w, float b){
 
   float del = 0;
   
-  if(abs(b) < CENTERED_THRESHOLD){
+  // if(abs(b) < CENTERED_THRESHOLD){
+  if(false){
     if (abs(w) < STRAIGHT_THRESHOLD){
       ROS_INFO("NOT CENTERED IN 1 LINE GO STRAIGHT");
       del = 0;
@@ -95,7 +96,8 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
 
     float mean_slope = (lw0 * left_cloud_size + rw0 * right_cloud_size) / (left_cloud_size + right_cloud_size);
 
-    if (abs(lw1) < CENTERED_THRESHOLD || abs(rw1) < CENTERED_THRESHOLD)
+    // if (abs(lw1) < CENTERED_THRESHOLD || abs(rw1) < CENTERED_THRESHOLD)
+    if (false)
     {
       ROS_INFO("NOT CENTERED....... AND ");
       if (abs(lw1) < CENTERED_THRESHOLD)
