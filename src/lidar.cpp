@@ -16,7 +16,7 @@
 #include "delta.cpp"
 
 #define FORWARD_RANGE 3.5
-#define WIDTH 2
+#define WIDTH 1.5
 
 
 
