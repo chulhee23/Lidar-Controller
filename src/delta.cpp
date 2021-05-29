@@ -46,14 +46,15 @@ float oneLineFollow(float w, float b){
     } 
     else if (abs(w) < MIN_TURN_THRESHOLD){
       ROS_INFO("CENTERED IN 1 LINE MIN TURN");
+      del = (w > 0 ? MIN_TURN : -MIN_TURN);
       del = MIN_TURN;
     }
     else if (abs(w) < TURN_THRESHOLD){
       ROS_INFO("CENTERED IN 1 LINE TURN");
-      del = TURN;
+      del = (w > 0 ? TURN : -TURN);
     } else {
       ROS_INFO("CENTERED IN 1 LINE MAX TURN");
-      del = MAX_TURN;
+      del = (w > 0 ? MAX_TURN : -MAX_TURN);
     }
     
   }
