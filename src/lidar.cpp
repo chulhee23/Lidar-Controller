@@ -50,7 +50,7 @@ void drawLine(LineComponent leftLine, LineComponent rightLine)
     LineComponent tmp_line = lines[i];
     if (notDetected(tmp_line.w0) || notDetected(tmp_line.w1))
     {
-      ROS_INFO("AT LEAST 1 LINE MISSED ....");
+      continue;
     }
     else
     {
