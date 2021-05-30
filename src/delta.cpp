@@ -2,15 +2,15 @@
 #include <std_msgs/Float64.h>
 #include <pcl/point_cloud.h>
 
-#define CENTERED_THRESHOLD 0.35
+#define CENTERED_THRESHOLD 0.4
 
-#define STRAIGHT_THRESHOLD 0.2
-#define MIN_TURN_THRESHOLD 0.3
+#define STRAIGHT_THRESHOLD 0.23
+#define MIN_TURN_THRESHOLD 0.4
 #define TURN_THRESHOLD 0.5
 
 #define MIN_TURN 0.2
-#define TURN 0.35
-#define MAX_TURN 0.5
+#define TURN 0.42
+#define MAX_TURN 0.6
 
 float delta = 0.0;
 
@@ -107,7 +107,7 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Left centered LEFT TURN");
-          delta = MIN_TURN;
+          delta = (MIN_TURN + TURN )/2;
         }
       }
       else
@@ -115,7 +115,7 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
         ROS_INFO("RIGHT CENTERED! %f", lw1);
         if(mean_slope < 0 ){
           ROS_INFO("Right centered RIGHT TURN");
-          delta = MIN_TURN;
+          delta = -((MIN_TURN+TURN)/2);
         }
         else if (mean_slope > 0 ){
           ROS_INFO("Right centered LEFT TURN");

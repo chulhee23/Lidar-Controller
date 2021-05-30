@@ -15,7 +15,7 @@
 #include "gradientDescent.cpp"
 #include "delta.cpp"
 
-#define FORWARD_RANGE 2.3
+#define FORWARD_RANGE 2
 #define WIDTH 1.5
 
 
@@ -188,7 +188,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // control delta value
 
   std_msgs::Float64 delta;
-  delta.data = getDelta(leftLine.w0, leftLine.w1, clustered[0], rightLine.w0, rightLine.w1, clustered[1]) - 0.03;
+  delta.data = getDelta(leftLine.w0, leftLine.w1, clustered[0], rightLine.w0, rightLine.w1, clustered[1]);
   
   del_pub.publish(delta);
 
