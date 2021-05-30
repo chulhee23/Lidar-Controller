@@ -2,11 +2,11 @@
 #include <std_msgs/Float64.h>
 #include <pcl/point_cloud.h>
 
-#define CENTERED_THRESHOLD 0.3
+#define CENTERED_THRESHOLD 0.35
 
 #define STRAIGHT_THRESHOLD 0.2
 #define MIN_TURN_THRESHOLD 0.3
-#define TURN_THRESHOLD 0.6
+#define TURN_THRESHOLD 0.5
 
 #define MIN_TURN 0.2
 #define TURN 0.35
@@ -34,7 +34,7 @@ float oneLineFollow(float w, float b){
       del = 0;
     } else {
       ROS_INFO("NOT CENTERED IN 1 LINE && TURN");
-      del = (w > 0 ? TURN : -TURN);
+      del = (w > 0 ? MAX_TURN : -MAX_TURN);
 
     }
     
@@ -47,7 +47,6 @@ float oneLineFollow(float w, float b){
     else if (abs(w) < MIN_TURN_THRESHOLD){
       ROS_INFO("CENTERED IN 1 LINE MIN TURN");
       del = (w > 0 ? MIN_TURN : -MIN_TURN);
-      del = MIN_TURN;
     }
     else if (abs(w) < TURN_THRESHOLD){
       ROS_INFO("CENTERED IN 1 LINE TURN");
