@@ -5,6 +5,7 @@
 
 #define CENTERED_THRESHOLD 0.4
 #define MICRO_TURN 0.05
+#define SLOPE_WEIGHT 1.15
 
 float delta = 0.0;
 
@@ -25,9 +26,9 @@ float oneLineFollow(float w, float b)
   ROS_INFO(" 1 LINE DETECTED ");
   float del = 0;
 
-  del = atan2f(w * 1.15, 1);
-  if (abs(delta) < 0.2){
-    if (abs(b) < CENTERED_THRESHOLD){
+  del = atan2f(w * SLOPE_WEIGHT, 1);
+  if (abs(b) < CENTERED_THRESHOLD){
+    if (abs(delta) < 0.2){
       if(b < 0){
         del += MICRO_TURN;
       } else {
@@ -76,7 +77,7 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
     float mean_slope = (lw0 * left_cloud_size + rw0 * right_cloud_size) / (left_cloud_size + right_cloud_size);
 
     // default delta
-    delta = atan2f(mean_slope * 1.15, 1);
+    delta = atan2f(mean_slope * SLOPE_WEIGHT, 1);
 
     // y 절편
     if (abs(delta) < 0.2){
