@@ -6,6 +6,7 @@
 #define CENTERED_THRESHOLD 0.4
 #define MICRO_TURN 0.05
 #define SLOPE_WEIGHT 1.15
+// max del : 0.5233
 
 float delta = 0.0;
 
@@ -21,12 +22,25 @@ float notDetected(float v)
   }
 }
 
+
+float purePursuit(float w){
+  float car_axis_distance = 0.257;
+  float alpha = atan2f(w, 1);
+  float Ld = 1.5;
+  // Ld lower -> 횡방향
+  // Ld higher -> 조향 감소
+  return atan2f(2 * 0.257 * sin(alpha), Ld);
+}
+
+
 float oneLineFollow(float w, float b)
 {
   ROS_INFO(" 1 LINE DETECTED ");
   float del = 0;
 
-  del = atan2f(w * SLOPE_WEIGHT, 1);
+  // pure pursuit algorithm
+  del = purePursuit(w);
+
   if (abs(b) < CENTERED_THRESHOLD){
     if (abs(delta) < 0.2){
       if(b < 0){
@@ -36,6 +50,7 @@ float oneLineFollow(float w, float b)
       }
     }
   }
+
   return del;
 }
 
@@ -77,7 +92,10 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
     float mean_slope = (lw0 * left_cloud_size + rw0 * right_cloud_size) / (left_cloud_size + right_cloud_size);
 
     // default delta
-    delta = atan2f(mean_slope * SLOPE_WEIGHT, 1);
+    // pure pursuit algorithm
+    // delta = atan2f(mean_slope * SLOPE_WEIGHT, 1);
+    delta = purePursuit(mean_slope);
+    
 
     // y 절편
     if (abs(delta) < 0.2){
