@@ -2,15 +2,15 @@
 #include <std_msgs/Float64.h>
 #include <pcl/point_cloud.h>
 
-#define CENTERED_THRESHOLD 0.4
+#define CENTERED_THRESHOLD 0.35
 
-#define STRAIGHT_THRESHOLD 0.23
-#define MIN_TURN_THRESHOLD 0.4
+#define STRAIGHT_THRESHOLD 0.18
+#define MIN_TURN_THRESHOLD 0.42
 #define TURN_THRESHOLD 0.5
 
-#define MIN_TURN 0.2
-#define TURN 0.42
-#define MAX_TURN 0.6
+#define MIN_TURN 0.17 
+#define TURN 0.4
+#define MAX_TURN 1
 
 float delta = 0.0;
 
