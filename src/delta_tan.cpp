@@ -25,7 +25,7 @@ float oneLineFollow(float w, float b)
   ROS_INFO(" 1 LINE DETECTED ");
   float del = 0;
 
-  del = atan2(mean_slope * 1.15);
+  del = atan2(w * 1.15);
   if (abs(delta) < 0.2){
     if (abs(b) < CENTERED_THRESHOLD){
       if(b < 0){
