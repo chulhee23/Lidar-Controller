@@ -26,7 +26,7 @@ float notDetected(float v)
 float purePursuit(float w){
   float car_axis_distance = 0.257;
   float alpha = atan2f(w, 1);
-  float Ld = 1.5;
+  float Ld = 0.5;
   // Ld lower -> 횡방향
   // Ld higher -> 조향 감소
   return atan2f(2 * 0.257 * sin(alpha), Ld);
