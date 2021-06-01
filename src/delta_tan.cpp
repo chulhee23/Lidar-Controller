@@ -26,10 +26,10 @@ float notDetected(float v)
 float purePursuit(float w){
   float car_axis_distance = 0.257;
   float alpha = atan2f(w, 1);
-  float Ld = 0.55;
+  float Ld = 0.52;
   // Ld lower -> 횡방향
   // Ld higher -> 조향 감소
-  return atan2f(2 * car_axis_distance * sin(alpha), Ld);
+  return atan2f(2 * car_axis_distance * sin(alpha), Ld) * 1.2;
 
 }
 
@@ -43,7 +43,7 @@ float oneLineFollow(float w, float b)
   del = purePursuit(w);
 
   if (abs(b) < CENTERED_THRESHOLD){
-    if (abs(delta) < 0.2){
+    if (abs(delta) < 0.3){
       if(b < 0){
         del += MICRO_TURN;
       } else {
@@ -99,15 +99,15 @@ float getDelta(float w0, float b0, pcl::PointCloud<pcl::PointXYZ> cloud0, float 
     
 
     // y 절편
-    if (abs(delta) < 0.2){
+
+    if (abs(delta) < 0.25){
       if(abs(rw1) < CENTERED_THRESHOLD){
         delta += MICRO_TURN;
       }
       if(abs(lw1) < CENTERED_THRESHOLD){
         delta -= MICRO_TURN;
       }
-    }
-    
+    }    
 
   }
   else
