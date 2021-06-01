@@ -13,7 +13,7 @@
 #include <pcl/segmentation/extract_clusters.h>
 
 #include "gradientDescent.cpp"
-#include "delta.cpp"
+#include "delta_tan.cpp"
 
 #define FORWARD_RANGE 2
 #define WIDTH 1.5
