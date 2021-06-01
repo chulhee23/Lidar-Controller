@@ -209,12 +209,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
 
   // ==========
   std_msgs::Float64 velocity;
-  if (abs(delta.data) < 0.3) {
+  if (abs(delta.data) < 0.25) {
     velocity.data = 6.8;
-  } else if (abs(delta.data) < 0.25){
-    velocity.data = 6.3;
+  } else if (abs(delta.data) < 0.3){
+    velocity.data = abs(delta.data) * 74 -15.7;
   } else {
-    velocity.data = 3.5;
+    velocity.data = 2.8;
   }
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
