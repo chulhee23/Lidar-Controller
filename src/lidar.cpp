@@ -190,9 +190,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   std_msgs::Float64 delta;
   delta.data = getDelta(leftLine.w0, leftLine.w1, clustered[0], rightLine.w0, rightLine.w1, clustered[1]);
 
-  //if (delta.data == 0){
-   // delta.data -= 0.02;
-  //}
+  if (delta.data == 0){
+    delta.data -= 0.03;
+  }
   
   del_pub.publish(delta);
 
@@ -210,11 +210,12 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // ==========
   std_msgs::Float64 velocity;
   if (abs(delta.data) < 0.25) {
-    velocity.data = 6.8;
+    velocity.data = 4;
   } else if (abs(delta.data) < 0.3){
-    velocity.data = abs(delta.data) * 74 -15.7;
+    // velocity.data = abs(delta.data) * 74 -15.7;
+    velocity.data = 3.4;
   } else {
-    velocity.data = 2.8;
+    velocity.data = 2.5;
   }
   vel_pub.publish(velocity);
   ROS_INFO("VELOCITY %f", velocity.data);
@@ -254,4 +255,6 @@ int main(int argc, char **argv)
   // }
   ros::spin();
   return 0;
+
+
 }

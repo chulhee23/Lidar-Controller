@@ -4,7 +4,7 @@
 #include <pcl/point_cloud.h>
 
 #define CENTERED_THRESHOLD 0.4
-#define MICRO_TURN 0.05
+#define MICRO_TURN 0.1
 #define SLOPE_WEIGHT 1.15
 // max del : 0.5233
 
@@ -26,10 +26,11 @@ float notDetected(float v)
 float purePursuit(float w){
   float car_axis_distance = 0.257;
   float alpha = atan2f(w, 1);
-  float Ld = 0.5;
+  float Ld = 0.55;
   // Ld lower -> 횡방향
   // Ld higher -> 조향 감소
-  return atan2f(2 * 0.257 * sin(alpha), Ld);
+  return atan2f(2 * car_axis_distance * sin(alpha), Ld);
+
 }
 
 
