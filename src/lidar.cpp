@@ -210,9 +210,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   // ==========
   std_msgs::Float64 velocity;
   float a = 0.1;
-  float v1 = 8;
+  float v1 = 9;
   float b = 0.36;
-  float v2 = 3;
+  float v2 = 3.2;
  
   if (abs(delta.data) < a) {
     velocity.data = v1;
