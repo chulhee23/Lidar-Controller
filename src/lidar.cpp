@@ -13,7 +13,7 @@
 #include <pcl/segmentation/extract_clusters.h>
 
 #include "gradientDescent.cpp"
-#include "delta_tan.cpp"
+#include "delta.cpp"
 
 #define FORWARD_RANGE 2
 #define WIDTH 1.5
@@ -130,8 +130,6 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   point_pub.publish(filteredOutput);
   // =============================
 
-  // =======
-
   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
   kdtree->setInputCloud(passCloud.makeShared());
 
@@ -147,9 +145,6 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   ec.setInputCloud(passCloud.makeShared());
 
   ec.extract(clusterIndices);
-
-  // pcl::PointCloud<pcl::PointXYZ> clusteredLeft;
-  // pcl::PointCloud<pcl::PointXYZ> clusteredRight;
 
   pcl::PointCloud<pcl::PointXYZ> clustered[2];
 
@@ -190,6 +185,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr &scan)
   std_msgs::Float64 delta;
   delta.data = getDelta(leftLine.w0, leftLine.w1, clustered[0], rightLine.w0, rightLine.w1, clustered[1]);
 
+  // 우측 조향 힘 약해서 보정
   if (delta.data == 0){
     delta.data -= 0.03;
   }

@@ -8,9 +8,6 @@
 #include <utility>
 using namespace std;
 
-// float getLineY(float x1, float x2, float y1, float y2, float x3){
-//   return (float(y2 - y1)/float(x2 - x1) * (x3 - x1) + y1);
-// }
 
 struct LineComponent {
   float w0;
